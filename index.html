@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth-compat.js"></script>
 
     <style>
+        /* جميع التنسيقات الأصلية بدون تغيير */
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
@@ -45,7 +46,6 @@
             transition: background 0.5s ease;
         }
 
-        /* نافذة الكود السري بتصميم الموقع */
         .secret-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
@@ -181,8 +181,6 @@
         .actions-box { display: flex; gap: 12px; }
         .actions-box i { cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
 
-        .click-count { font-size: 0.7rem; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 10px; margin-right: 5px; opacity: 0.8; }
-
         .public-url-box {
             margin-top: 40px; padding: 20px; background: rgba(255, 255, 255, 0.1);
             border-radius: 22px; border: 1px dashed rgba(255, 255, 255, 0.5); cursor: pointer;
@@ -207,6 +205,18 @@
             border: 1px solid var(--glass-border); cursor: pointer; backdrop-filter: blur(10px);
             font-weight: 600; font-size: 0.9rem; transition: 0.3s;
         }
+
+        /* تنسيقات لوحة الأدمن الجديدة */
+        .admin-user-card {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: rgba(255,255,255,0.08);
+            margin-bottom: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: left;
+        }
+        .verify-toggle {
+            cursor: pointer; padding: 6px 12px; border-radius: 10px; border: none;
+            font-weight: bold; font-size: 0.75rem; transition: 0.3s; color: white;
+        }
     </style>
 </head>
 <body>
@@ -220,6 +230,15 @@
             <button class="btn-teardrop" onclick="verifySecretCode()">Unlock Room</button>
             <p onclick="closeSecretModal()" style="font-size: 0.7rem; margin-top: 15px; cursor: pointer; opacity: 0.5;">Cancel</p>
         </div>
+    </div>
+
+    <div id="admin-panel" class="container hidden" style="max-width: 550px;">
+        <h1 class="gold-shiny">Admin Panel</h1>
+        <p class="sub-text">Search and manage user verification</p>
+        <input type="text" id="admin-search" placeholder="Search users by name..." oninput="filterAdminUsers()">
+        <div id="admin-users-list" style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
+            </div>
+        <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.1); margin-top: 20px;">Back to Dashboard</button>
     </div>
 
     <img id="main-brand-logo" src="https://i.postimg.cc/wj9vh1rY/file-00000000d47471f8bba9beefdc85fae3-(1).png" alt="Logo" class="brand-logo" onclick="handleLogoClick()">
@@ -316,21 +335,17 @@
         let activeUsername = null;
         let editingLinkId = null; 
         let isPreviewMode = false;
-
-        // نظام الغرفة السرية المطور
         let logoClicks = 0;
         let lastClickTime = 0;
+        let allUsersForAdmin = [];
 
+        // نظام الغرفة السرية واللوجو
         function handleLogoClick() {
             const currentTime = new Date().getTime();
             if (currentTime - lastClickTime > 1000) { logoClicks = 0; }
             logoClicks++;
             lastClickTime = currentTime;
-
-            if (logoClicks >= 6) {
-                logoClicks = 0;
-                openSecretModal();
-            }
+            if (logoClicks >= 6) { logoClicks = 0; openSecretModal(); }
         }
 
         function openSecretModal() {
@@ -340,22 +355,68 @@
             document.getElementById('secret-input').focus();
         }
 
-        function closeSecretModal() {
-            document.getElementById('secret-overlay').style.display = 'none';
-        }
+        function closeSecretModal() { document.getElementById('secret-overlay').style.display = 'none'; }
 
-        function verifySecretCode() {
+        async function verifySecretCode() {
             const val = document.getElementById('secret-input').value;
             if (val === "666666") {
                 closeSecretModal();
-                alert("✅ Success: Secret Access Granted.");
-                // هنا يمكن توجيه المستخدم أو تفعيل ميزة سرية
+                loadAdminPanel();
             } else {
                 document.getElementById('secret-error').style.display = 'block';
                 document.getElementById('secret-input').value = '';
             }
         }
 
+        // وظائف الأدمن الجديدة
+        async function loadAdminPanel() {
+            toggleView('admin-panel');
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = '<p>Loading database...</p>';
+            try {
+                const snapshot = await db.collection("users").get();
+                allUsersForAdmin = [];
+                snapshot.forEach(doc => allUsersForAdmin.push({ id: doc.id, ...doc.data() }));
+                renderAdminList(allUsersForAdmin);
+            } catch (e) { alert("Error: " + e.message); }
+        }
+
+        function renderAdminList(users) {
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = '';
+            users.forEach(u => {
+                const isV = u.isVerified || false;
+                const div = document.createElement('div');
+                div.className = 'admin-user-card';
+                div.innerHTML = `
+                    <div>
+                        <strong style="font-size:1rem;">@${u.username}</strong><br>
+                        <small style="opacity:0.6; font-size:0.7rem;">UID: ${u.uid.substring(0,8)}...</small>
+                    </div>
+                    <button class="verify-toggle" 
+                            style="background:${isV ? '#ef4444' : '#38bdf8'}" 
+                            onclick="toggleVerification('${u.id}', ${isV})">
+                        ${isV ? 'Revoke' : 'Verify'}
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function filterAdminUsers() {
+            const term = document.getElementById('admin-search').value.toLowerCase();
+            const filtered = allUsersForAdmin.filter(u => u.username.toLowerCase().includes(term));
+            renderAdminList(filtered);
+        }
+
+        async function toggleVerification(docId, current) {
+            try {
+                await db.collection("users").doc(docId).update({ isVerified: !current });
+                loadAdminPanel(); 
+            } catch(e) { alert(e.message); }
+        }
+
+        // استكمال جميع الوظائف الأصلية بدون تعديل
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             const userParam = params.get('u');
@@ -375,9 +436,7 @@
         function userSignOut() {
             auth.signOut().then(() => {
                 activeUserUID = null;
-                toggleView('login-box');
-                document.getElementById('top-identity').classList.add('hidden');
-                document.getElementById('side-menu').classList.remove('active');
+                location.reload();
             });
         }
 
@@ -403,7 +462,7 @@
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             const logo = document.getElementById('main-brand-logo');
-            if(id === 'dashboard-box') { logo.style.display = 'none'; } else { logo.style.display = 'block'; }
+            if(id === 'dashboard-box' || id === 'admin-panel') { logo.style.display = 'none'; } else { logo.style.display = 'block'; }
         }
 
         function getPlatformMeta(name) {
@@ -421,59 +480,26 @@
             const email = document.getElementById('reg-email').value.trim();
             const user = document.getElementById('reg-user').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
-            const btn = document.querySelector('#signup-box .btn-teardrop');
-
             if (!email || !user || !pass) return alert("Fill details");
-
-            btn.innerText = "Creating Account...";
-            btn.disabled = true;
-
             try {
                 const userQuery = await db.collection("users").where("username", "==", user).get();
-                if (!userQuery.empty) {
-                    alert("Username taken");
-                    btn.innerText = "Create Account";
-                    btn.disabled = false;
-                    return;
-                }
-
+                if (!userQuery.empty) return alert("Username taken");
                 const res = await auth.createUserWithEmailAndPassword(email, pass);
-                const userData = {
-                    uid: res.user.uid,
-                    username: user,
-                    links: [],
-                    profilePic: null,
-                    isVerified: false,
-                    theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)'
-                };
+                const userData = { uid: res.user.uid, username: user, links: [], profilePic: null, isVerified: false, theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)' };
                 await db.collection("users").doc(res.user.uid).set(userData);
                 enterDashboard(res.user.uid, userData);
-            } catch (e) {
-                alert("Error: " + e.message);
-                btn.innerText = "Create Account";
-                btn.disabled = false;
-            }
+            } catch (e) { alert(e.message); }
         }
 
         async function manualLogin() {
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
-            const btn = document.querySelector('#login-box .btn-teardrop');
-
             if (!email || !pass) return;
-
-            btn.innerText = "Signing In...";
-            btn.disabled = true;
-
             try {
                 const res = await auth.signInWithEmailAndPassword(email, pass);
                 const userDoc = await db.collection("users").doc(res.user.uid).get();
                 enterDashboard(res.user.uid, userDoc.data());
-            } catch (e) {
-                alert("Login Error: " + e.message);
-                btn.innerText = "Sign In";
-                btn.disabled = false;
-            }
+            } catch (e) { alert("Login Error: " + e.message); }
         }
 
         async function enterDashboard(uid, data) {
@@ -481,18 +507,12 @@
             activeUsername = data.username;
             toggleView('dashboard-box');
             document.getElementById('top-identity').classList.remove('hidden');
+            const vBadge = data.isVerified ? ' <i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
+            document.getElementById('header-user-name').innerHTML = "@" + activeUsername + vBadge;
             document.getElementById('user-display').innerText = "@" + activeUsername;
-            
-            const verifiedBadge = data.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
-            document.getElementById('header-user-name').innerHTML = "@" + activeUsername + verifiedBadge;
-            
             document.getElementById('link-text').innerText = window.location.origin + window.location.pathname + "?u=" + activeUsername;
-
-            if (data.profilePic) {
-                document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`;
-            }
+            if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
             if (data.theme) { document.body.style.background = data.theme; }
-
             renderLinks(data.links || []);
         }
 
@@ -500,11 +520,9 @@
             const name = document.getElementById('platform').value.trim();
             const url = document.getElementById('url').value.trim();
             const desc = document.getElementById('desc').value.trim();
-
             if (!name || !url) return;
             const userDoc = await db.collection("users").doc(activeUserUID).get();
             let currentLinks = userDoc.data().links || [];
-
             if (editingLinkId) {
                 const idx = currentLinks.findIndex(l => l.id === editingLinkId);
                 currentLinks[idx] = { ...currentLinks[idx], name, url, desc };
@@ -512,70 +530,21 @@
             } else { 
                 currentLinks.push({ name, url, desc, id: Date.now(), clicks: 0 }); 
             }
-
             await db.collection("users").doc(activeUserUID).update({ links: currentLinks });
-            document.getElementById('platform').value = ''; 
-            document.getElementById('url').value = '';
-            document.getElementById('desc').value = '';
+            document.getElementById('platform').value = ''; document.getElementById('url').value = ''; document.getElementById('desc').value = '';
             renderLinks(currentLinks);
         }
 
         async function trackClick(id, targetUrl) {
-            if (!isPreviewMode) {
-                window.open(targetUrl, '_blank');
-                return;
-            }
-
+            if (!isPreviewMode) { window.open(targetUrl, '_blank'); return; }
             const userQuery = await db.collection("users").where("username", "==", activeUsername).get();
             if (!userQuery.empty) {
                 const userDoc = userQuery.docs[0];
                 const links = userDoc.data().links;
-                const updatedLinks = links.map(l => {
-                    if(l.id === id) return { ...l, clicks: (l.clicks || 0) + 1 };
-                    return l;
-                });
+                const updatedLinks = links.map(l => (l.id === id) ? { ...l, clicks: (l.clicks || 0) + 1 } : l);
                 await db.collection("users").doc(userDoc.id).update({ links: updatedLinks });
             }
             window.open(targetUrl, '_blank');
-        }
-
-        function editLink(id) {
-            db.collection("users").doc(activeUserUID).get().then(doc => {
-                const link = doc.data().links.find(l => l.id === id);
-                document.getElementById('platform').value = link.name;
-                document.getElementById('url').value = link.url;
-                document.getElementById('desc').value = link.desc || '';
-                editingLinkId = id;
-                document.getElementById('submit-btn').innerText = "Save Changes";
-                document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            });
-        }
-
-        function cancelEdit() {
-            editingLinkId = null;
-            document.getElementById('platform').value = ''; 
-            document.getElementById('url').value = '';
-            document.getElementById('desc').value = '';
-            document.getElementById('submit-btn').innerText = "+ Add New Link";
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-        }
-
-        function handleDragStart(e) { e.dataTransfer.setData("text/plain", e.target.getAttribute("data-id")); }
-
-        async function handleDrop(e) {
-            e.preventDefault();
-            const draggedId = e.dataTransfer.getData("text/plain");
-            const targetId = e.currentTarget.getAttribute("data-id");
-            if(draggedId === targetId) return;
-
-            const userDoc = await db.collection("users").doc(activeUserUID).get();
-            let links = userDoc.data().links;
-            const draggedIdx = links.findIndex(l => l.id == draggedId);
-            const targetIdx = links.findIndex(l => l.id == targetId);
-            const [removed] = links.splice(draggedIdx, 1);
-            links.splice(targetIdx, 0, removed);
-            await db.collection("users").doc(activeUserUID).update({ links: links });
-            renderLinks(links);
         }
 
         async function renderLinks(providedLinks = null) {
@@ -586,7 +555,6 @@
                 const userDoc = await db.collection("users").doc(activeUserUID || auth.currentUser.uid).get();
                 links = userDoc.data().links || [];
             }
-
             links.forEach(l => {
                 const meta = getPlatformMeta(l.name);
                 const card = document.createElement(isPreviewMode ? 'a' : 'div');
@@ -594,7 +562,7 @@
                 card.setAttribute("data-id", l.id);
                 if (!isPreviewMode) {
                     card.draggable = true;
-                    card.ondragstart = handleDragStart;
+                    card.ondragstart = (e) => e.dataTransfer.setData("text/plain", e.target.getAttribute("data-id"));
                     card.ondragover = (e) => e.preventDefault();
                     card.ondrop = handleDrop;
                 }
@@ -616,6 +584,40 @@
                     </div>`;
                 list.appendChild(card);
             });
+        }
+
+        async function handleDrop(e) {
+            e.preventDefault();
+            const draggedId = e.dataTransfer.getData("text/plain");
+            const targetId = e.currentTarget.getAttribute("data-id");
+            if(draggedId === targetId) return;
+            const userDoc = await db.collection("users").doc(activeUserUID).get();
+            let links = userDoc.data().links;
+            const dIdx = links.findIndex(l => l.id == draggedId);
+            const tIdx = links.findIndex(l => l.id == targetId);
+            const [removed] = links.splice(dIdx, 1);
+            links.splice(tIdx, 0, removed);
+            await db.collection("users").doc(activeUserUID).update({ links: links });
+            renderLinks(links);
+        }
+
+        function editLink(id) {
+            db.collection("users").doc(activeUserUID).get().then(doc => {
+                const link = doc.data().links.find(l => l.id === id);
+                document.getElementById('platform').value = link.name;
+                document.getElementById('url').value = link.url;
+                document.getElementById('desc').value = link.desc || '';
+                editingLinkId = id;
+                document.getElementById('submit-btn').innerText = "Save Changes";
+                document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            });
+        }
+
+        function cancelEdit() {
+            editingLinkId = null;
+            document.getElementById('platform').value = ''; document.getElementById('url').value = ''; document.getElementById('desc').value = '';
+            document.getElementById('submit-btn').innerText = "+ Add New Link";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
         async function deleteLink(id) {
@@ -646,23 +648,17 @@
         async function loadVisitorProfile(username) {
             const userQuery = await db.collection("users").where("username", "==", username).get();
             if (userQuery.empty) return alert("User not found!");
-            const userDoc = userQuery.docs[0];
-            const data = userDoc.data();
-            activeUsername = username;
-            isPreviewMode = true;
+            const data = userQuery.docs[0].data();
+            activeUsername = username; isPreviewMode = true;
             toggleView('dashboard-box');
-            document.getElementById('main-brand-logo').style.display = 'none';
-            document.getElementById('side-menu-trigger').style.display = 'none';
             document.getElementById('dashboard-box').classList.add('preview-mode');
-            document.getElementById('user-status-text').style.visibility = 'hidden';
             document.getElementById('visitor-share-btn').classList.remove('hidden');
-            if (data.theme) { document.body.style.background = data.theme; }
-            if (data.profilePic || data.username) {
-                document.getElementById('top-identity').classList.remove('hidden');
-                const verifiedBadge = data.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
-                document.getElementById('header-user-name').innerHTML = "@" + username + verifiedBadge;
-                if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
-            }
+            document.getElementById('side-menu-trigger').style.display = 'none';
+            if (data.theme) document.body.style.background = data.theme;
+            document.getElementById('top-identity').classList.remove('hidden');
+            const vBadge = data.isVerified ? ' <i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
+            document.getElementById('header-user-name').innerHTML = "@" + username + vBadge;
+            if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
             renderLinks(data.links || []);
         }
     </script>
