@@ -6,7 +6,7 @@
     <title>TapLinks | Professional Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth-compat.js"></script>
@@ -52,7 +52,7 @@
             transition: transform 0.3s ease;
             max-width: 100%;
         }
-        
+
         .brand-logo:hover { transform: scale(1.03); }
 
         .gold-shiny {
@@ -125,7 +125,7 @@
             text-align: left; padding-left: 20px; font-size: 1rem;
             transition: all 0.3s ease;
         }
-        
+
         input:focus { border-color: #ffffff; background: #ffffff; color: #1e3a8a; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
 
         .btn-teardrop {
@@ -167,24 +167,34 @@
             border-radius: 22px; border: 1px dashed rgba(255, 255, 255, 0.5); cursor: pointer;
             word-break: break-all;
         }
-        
+
         .footer-signature {
             position: absolute; bottom: 8px; right: 10px;
             font-size: 0.85rem; opacity: 0.8; z-index: 10;
         }
 
         .hidden { display: none !important; }
-        
+
         .dashboard-header {
             display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; margin-top: 10px;
         }
-        .dashboard-header img { width: 45px; height: auto; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); }
+        .dashboard-header img { width: 45px; height: auto; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); cursor: pointer; }
 
         #visitor-share-btn {
             position: fixed; top: 30px; left: 30px; z-index: 1000;
             background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 50px;
             border: 1px solid var(--glass-border); cursor: pointer; backdrop-filter: blur(10px);
             font-weight: 600; font-size: 0.9rem; transition: 0.3s;
+        }
+
+        /* تنسيقات لوحة الإدارة */
+        .admin-user-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 15px; margin-bottom: 10px;
+        }
+        .admin-btn {
+            background: rgba(255,255,255,0.2); border: 1px solid white; color: white;
+            padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.75rem;
         }
     </style>
 </head>
@@ -199,7 +209,7 @@
     </div>
 
     <div id="top-identity" class="top-profile-identity hidden">
-        <span id="header-user-name" style="font-weight: 600; font-size: 0.9rem;">@user</span>
+        <span id="header-user-name" style="display: flex; align-items: center; font-weight: 600; font-size: 0.9rem;">@user</span>
         <div class="profile-pic" id="profile-display" onclick="document.getElementById('imageInput').click()">?</div>
         <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
     </div>
@@ -248,7 +258,7 @@
 
     <div id="dashboard-box" class="container hidden">
         <div class="dashboard-header">
-            <img src="https://i.postimg.cc/vTBFv6nF/20260215-235309.png" alt="Icon">
+            <img src="https://i.postimg.cc/vTBFv6nF/20260215-235309.png" alt="Icon" onclick="adminCounterTrigger()">
             <h1 style="margin: 0; padding-left: 5px;" class="gold-shiny">TapLinks</h1>
         </div>
         <p class="sub-text" id="user-status-text">Managing links for <strong id="user-display" style="text-decoration: underline;"></strong></p>
@@ -262,6 +272,13 @@
             <small style="opacity:0.8">Your professional link:</small><br>
             <strong id="link-text" style="font-family: monospace; font-size: 1.1rem;"></strong>
         </div>
+    </div>
+
+    <div id="admin-panel" class="container hidden">
+        <h1>Admin Control</h1>
+        <p class="sub-text">Manage user verifications</p>
+        <div id="admin-users-list" style="text-align: left; max-height: 300px; overflow-y: auto; margin-bottom: 20px; padding: 10px;"></div>
+        <button class="btn-teardrop" onclick="toggleView('dashboard-box')">Close Admin Panel</button>
     </div>
 
     <div class="footer-signature">Designed & Developed by Achraf</div>
@@ -284,6 +301,7 @@
         let activeUsername = null;
         let editingLinkId = null; 
         let isPreviewMode = false;
+        let adminClickCount = 0;
 
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
@@ -291,9 +309,45 @@
             if (userParam) { loadVisitorProfile(userParam); }
         };
 
+        // تفعيل لوحة الإدارة عند الضغط 5 مرات على اللوجو
+        function adminCounterTrigger() {
+            adminClickCount++;
+            if (adminClickCount >= 5) {
+                adminClickCount = 0;
+                openAdminPanel();
+            }
+            setTimeout(() => { adminClickCount = 0; }, 3000); 
+        }
+
+        async function openAdminPanel() {
+            toggleView('admin-panel');
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = 'Loading users...';
+            
+            const snapshot = await db.collection("users").get();
+            list.innerHTML = '';
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                const div = document.createElement('div');
+                div.className = 'admin-user-item';
+                div.innerHTML = `
+                    <span>@${u.username} ${u.isVerified ? '✅' : ''}</span>
+                    <button class="admin-btn" onclick="toggleUserVerify('${doc.id}', ${u.isVerified})">
+                        ${u.isVerified ? 'Unverify' : 'Verify'}
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function toggleUserVerify(uid, currentStatus) {
+            await db.collection("users").doc(uid).update({ isVerified: !currentStatus });
+            openAdminPanel(); 
+        }
+
         function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
         function toggleSubmenu() { document.getElementById('theme-submenu').classList.toggle('open'); }
-        
+
         async function changeTheme(gradient) { 
             document.body.style.background = gradient; 
             if(activeUserUID && !isPreviewMode) {
@@ -332,7 +386,7 @@
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             const logo = document.getElementById('main-brand-logo');
-            if(id === 'dashboard-box') logo.style.display = 'none'; else logo.style.display = 'block';
+            if(id === 'dashboard-box' || id === 'admin-panel') logo.style.display = 'none'; else logo.style.display = 'block';
         }
 
         function getPlatformMeta(name) {
@@ -353,7 +407,7 @@
             const btn = document.querySelector('#signup-box .btn-teardrop');
 
             if (!email || !user || !pass) return alert("Fill details");
-            
+
             btn.innerText = "Creating Account...";
             btn.disabled = true;
 
@@ -372,6 +426,7 @@
                     username: user,
                     links: [],
                     profilePic: null,
+                    isVerified: false,
                     theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)'
                 };
                 await db.collection("users").doc(res.user.uid).set(userData);
@@ -410,14 +465,17 @@
             toggleView('dashboard-box');
             document.getElementById('top-identity').classList.remove('hidden');
             document.getElementById('user-display').innerText = "@" + activeUsername;
-            document.getElementById('header-user-name').innerText = "@" + activeUsername;
-            document.getElementById('link-text').innerText = window.location.origin + window.location.pathname + "?u=" + activeUsername;
             
+            const verifiedBadge = data.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
+            document.getElementById('header-user-name').innerHTML = "@" + activeUsername + verifiedBadge;
+            
+            document.getElementById('link-text').innerText = window.location.origin + window.location.pathname + "?u=" + activeUsername;
+
             if (data.profilePic) {
                 document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`;
             }
             if (data.theme) { document.body.style.background = data.theme; }
-            
+
             renderLinks(data.links || []);
         }
 
@@ -429,7 +487,7 @@
             if (!name || !url) return;
             const userDoc = await db.collection("users").doc(activeUserUID).get();
             let currentLinks = userDoc.data().links || [];
-            
+
             if (editingLinkId) {
                 const idx = currentLinks.findIndex(l => l.id === editingLinkId);
                 currentLinks[idx] = { ...currentLinks[idx], name, url, desc };
@@ -437,7 +495,7 @@
             } else { 
                 currentLinks.push({ name, url, desc, id: Date.now(), clicks: 0 }); 
             }
-            
+
             await db.collection("users").doc(activeUserUID).update({ links: currentLinks });
             document.getElementById('platform').value = ''; 
             document.getElementById('url').value = '';
@@ -450,7 +508,7 @@
                 window.open(targetUrl, '_blank');
                 return;
             }
-            
+
             const userQuery = await db.collection("users").where("username", "==", activeUsername).get();
             if (!userQuery.empty) {
                 const userDoc = userQuery.docs[0];
@@ -493,7 +551,7 @@
             e.preventDefault();
             const draggedId = e.dataTransfer.getData("text/plain");
             const targetId = e.currentTarget.getAttribute("data-id");
-            
+
             if(draggedId === targetId) return;
 
             const userDoc = await db.collection("users").doc(activeUserUID).get();
@@ -511,7 +569,7 @@
         async function renderLinks(providedLinks = null) {
             const list = document.getElementById('links-list'); 
             list.innerHTML = '';
-            
+
             let links = providedLinks;
             if (!links) {
                 const userDoc = await db.collection("users").doc(activeUserUID || auth.currentUser.uid).get();
@@ -523,7 +581,7 @@
                 const card = document.createElement(isPreviewMode ? 'a' : 'div');
                 card.className = 'link-card';
                 card.setAttribute("data-id", l.id);
-                
+
                 if (!isPreviewMode) {
                     card.draggable = true;
                     card.ondragstart = handleDragStart;
@@ -581,7 +639,7 @@
         async function loadVisitorProfile(username) {
             const userQuery = await db.collection("users").where("username", "==", username).get();
             if (userQuery.empty) return alert("User not found!");
-            
+
             const userDoc = userQuery.docs[0];
             const data = userDoc.data();
             activeUsername = username;
@@ -594,10 +652,15 @@
             document.getElementById('visitor-share-btn').classList.remove('hidden');
 
             if (data.theme) { document.body.style.background = data.theme; }
-            if (data.profilePic) {
+            if (data.profilePic || data.username) {
                 document.getElementById('top-identity').classList.remove('hidden');
-                document.getElementById('header-user-name').innerText = "@" + username;
-                document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`;
+                
+                const verifiedBadge = data.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
+                document.getElementById('header-user-name').innerHTML = "@" + username + verifiedBadge;
+                
+                if (data.profilePic) {
+                    document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`;
+                }
             }
             renderLinks(data.links || []);
         }
