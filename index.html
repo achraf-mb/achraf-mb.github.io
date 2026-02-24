@@ -46,6 +46,25 @@
             transition: background 0.5s ease;
         }
 
+        /* تنسيق رسائل الحالة الجديدة */
+        #status-msg {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            padding: 12px 25px; border-radius: 12px; z-index: 10001;
+            font-weight: 600; font-size: 0.9rem; display: none;
+            backdrop-filter: blur(10px); animation: slideDown 0.3s ease;
+        }
+        .msg-success { background: rgba(34, 197, 94, 0.9); border: 1px solid #22c55e; }
+        .msg-error { background: rgba(239, 68, 68, 0.9); border: 1px solid #ef4444; }
+
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+
+        /* حاوية كلمة المرور مع العين */
+        .password-container { position: relative; width: 100%; }
+        .password-container i {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; opacity: 0.7; color: #fff; z-index: 5;
+        }
+
         .secret-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
@@ -206,7 +225,6 @@
             font-weight: 600; font-size: 0.9rem; transition: 0.3s;
         }
 
-        /* تنسيقات لوحة الأدمن الجديدة */
         .admin-user-card {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px; background: rgba(255,255,255,0.08);
@@ -221,11 +239,16 @@
 </head>
 <body>
 
+    <div id="status-msg"></div>
+
     <div id="secret-overlay" class="secret-modal-overlay">
         <div class="secret-modal">
             <h2 class="gold-shiny">Secret Access</h2>
             <p style="font-size: 0.85rem; opacity: 0.8;">Enter security code to proceed</p>
-            <input type="password" id="secret-input" maxlength="6" placeholder="******">
+            <div class="password-container">
+                <input type="password" id="secret-input" maxlength="6" placeholder="******">
+                <i class="fa-solid fa-eye" onclick="togglePasswordVisibility('secret-input', this)"></i>
+            </div>
             <div id="secret-error" class="error-msg">Invalid Security Code</div>
             <button class="btn-teardrop" onclick="verifySecretCode()">Unlock Room</button>
             <p onclick="closeSecretModal()" style="font-size: 0.7rem; margin-top: 15px; cursor: pointer; opacity: 0.5;">Cancel</p>
@@ -283,7 +306,10 @@
         <p class="sub-text">Build your professional presence in a vibrant, elegant space.</p>
         <input type="email" id="reg-email" placeholder="Email Address">
         <input type="text" id="reg-user" placeholder="Choose a Username">
-        <input type="password" id="reg-pass" placeholder="Create Password">
+        <div class="password-container">
+            <input type="password" id="reg-pass" placeholder="Create Password">
+            <i class="fa-solid fa-eye" onclick="togglePasswordVisibility('reg-pass', this)"></i>
+        </div>
         <button class="btn-teardrop" onclick="registerAndLogin()">Create Account</button>
         <span style="display:block; margin-top:25px; cursor:pointer; text-decoration:underline;" onclick="toggleView('login-box')">Already have an account? Login</span>
     </div>
@@ -292,7 +318,10 @@
         <h1>Welcome Back</h1>
         <p class="sub-text">Continue building your brand.</p>
         <input type="email" id="login-email" placeholder="Email Address">
-        <input type="password" id="login-pass" placeholder="Password">
+        <div class="password-container">
+            <input type="password" id="login-pass" placeholder="Password">
+            <i class="fa-solid fa-eye" onclick="togglePasswordVisibility('login-pass', this)"></i>
+        </div>
         <button class="btn-teardrop" onclick="manualLogin()">Sign In</button>
         <span style="display:block; margin-top:25px; cursor:pointer; text-decoration:underline;" onclick="toggleView('signup-box')">New here? Sign Up</span>
     </div>
@@ -339,6 +368,27 @@
         let lastClickTime = 0;
         let allUsersForAdmin = [];
 
+        // وظيفة إظهار/إخفاء كلمة المرور
+        function togglePasswordVisibility(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // نظام الرسائل المدمجة بدلاً من alert
+        function showStatus(msg, type = 'success') {
+            const el = document.getElementById('status-msg');
+            el.innerText = msg;
+            el.className = type === 'success' ? 'msg-success' : 'msg-error';
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+        }
+
         // نظام الغرفة السرية واللوجو
         function handleLogoClick() {
             const currentTime = new Date().getTime();
@@ -351,6 +401,8 @@
         function openSecretModal() {
             document.getElementById('secret-overlay').style.display = 'flex';
             document.getElementById('secret-input').value = '';
+            document.getElementById('secret-input').type = 'password';
+            document.querySelector('#secret-overlay .fa-eye-slash')?.classList.replace('fa-eye-slash', 'fa-eye');
             document.getElementById('secret-error').style.display = 'none';
             document.getElementById('secret-input').focus();
         }
@@ -368,7 +420,6 @@
             }
         }
 
-        // وظائف الأدمن الجديدة
         async function loadAdminPanel() {
             toggleView('admin-panel');
             const list = document.getElementById('admin-users-list');
@@ -378,7 +429,7 @@
                 allUsersForAdmin = [];
                 snapshot.forEach(doc => allUsersForAdmin.push({ id: doc.id, ...doc.data() }));
                 renderAdminList(allUsersForAdmin);
-            } catch (e) { alert("Error: " + e.message); }
+            } catch (e) { showStatus("Error: " + e.message, 'error'); }
         }
 
         function renderAdminList(users) {
@@ -413,10 +464,9 @@
             try {
                 await db.collection("users").doc(docId).update({ isVerified: !current });
                 loadAdminPanel(); 
-            } catch(e) { alert(e.message); }
+            } catch(e) { showStatus(e.message, 'error'); }
         }
 
-        // استكمال جميع الوظائف الأصلية بدون تعديل
         window.onload = () => {
             const params = new URLSearchParams(window.location.search);
             const userParam = params.get('u');
@@ -480,15 +530,15 @@
             const email = document.getElementById('reg-email').value.trim();
             const user = document.getElementById('reg-user').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
-            if (!email || !user || !pass) return alert("Fill details");
+            if (!email || !user || !pass) return showStatus("Fill all details", 'error');
             try {
                 const userQuery = await db.collection("users").where("username", "==", user).get();
-                if (!userQuery.empty) return alert("Username taken");
+                if (!userQuery.empty) return showStatus("Username taken", 'error');
                 const res = await auth.createUserWithEmailAndPassword(email, pass);
                 const userData = { uid: res.user.uid, username: user, links: [], profilePic: null, isVerified: false, theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)' };
                 await db.collection("users").doc(res.user.uid).set(userData);
                 enterDashboard(res.user.uid, userData);
-            } catch (e) { alert(e.message); }
+            } catch (e) { showStatus(e.message, 'error'); }
         }
 
         async function manualLogin() {
@@ -499,7 +549,7 @@
                 const res = await auth.signInWithEmailAndPassword(email, pass);
                 const userDoc = await db.collection("users").doc(res.user.uid).get();
                 enterDashboard(res.user.uid, userDoc.data());
-            } catch (e) { alert("Login Error: " + e.message); }
+            } catch (e) { showStatus("Login Error: " + e.message, 'error'); }
         }
 
         async function enterDashboard(uid, data) {
@@ -642,12 +692,14 @@
 
         function copyToClipboard() { 
             const urlToCopy = activeUsername ? (window.location.origin + window.location.pathname + "?u=" + activeUsername) : "";
-            navigator.clipboard.writeText(urlToCopy).then(() => alert("Profile Link Copied!")); 
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                showStatus("Profile Link Copied!");
+            }); 
         }
 
         async function loadVisitorProfile(username) {
             const userQuery = await db.collection("users").where("username", "==", username).get();
-            if (userQuery.empty) return alert("User not found!");
+            if (userQuery.empty) return showStatus("User not found!", 'error');
             const data = userQuery.docs[0].data();
             activeUsername = username; isPreviewMode = true;
             toggleView('dashboard-box');
