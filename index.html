@@ -12,7 +12,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth-compat.js"></script>
 
     <style>
-        /* جميع التنسيقات الأصلية بدون تغيير */
         * { 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
@@ -46,7 +45,7 @@
             transition: background 0.5s ease;
         }
 
-        /* تنسيق رسائل الحالة الجديدة */
+        /* رسائل الحالة */
         #status-msg {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             padding: 12px 25px; border-radius: 12px; z-index: 10001;
@@ -58,7 +57,7 @@
 
         @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
 
-        /* حاوية كلمة المرور مع العين */
+        /* رؤية كلمة السر */
         .password-container { position: relative; width: 100%; }
         .password-container i {
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
@@ -368,7 +367,30 @@
         let lastClickTime = 0;
         let allUsersForAdmin = [];
 
-        // وظيفة إظهار/إخفاء كلمة المرور
+        // معالجة فورية عند فتح الرابط لتجنب التأخير
+        (function initialCheck() {
+            const params = new URLSearchParams(window.location.search);
+            const userParam = params.get('u');
+            if (userParam) {
+                // إخفاء كل شيء فوراً والانتظار حتى انتهاء الفايربيز
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+                    document.getElementById('main-brand-logo').style.display = 'none';
+                });
+            }
+        })();
+
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const userParam = params.get('u');
+            if (userParam) { 
+                loadVisitorProfile(userParam); 
+            } else {
+                // تفعيل واجهة التسجيل فقط إذا لم يكن هناك زائر
+                toggleView('signup-box');
+            }
+        };
+
         function togglePasswordVisibility(inputId, icon) {
             const input = document.getElementById(inputId);
             if (input.type === 'password') {
@@ -380,7 +402,6 @@
             }
         }
 
-        // نظام الرسائل المدمجة بدلاً من alert
         function showStatus(msg, type = 'success') {
             const el = document.getElementById('status-msg');
             el.innerText = msg;
@@ -389,7 +410,6 @@
             setTimeout(() => { el.style.display = 'none'; }, 3000);
         }
 
-        // نظام الغرفة السرية واللوجو
         function handleLogoClick() {
             const currentTime = new Date().getTime();
             if (currentTime - lastClickTime > 1000) { logoClicks = 0; }
@@ -467,12 +487,6 @@
             } catch(e) { showStatus(e.message, 'error'); }
         }
 
-        window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            const userParam = params.get('u');
-            if (userParam) { loadVisitorProfile(userParam); }
-        };
-
         function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
         function toggleSubmenu() { document.getElementById('theme-submenu').classList.toggle('open'); }
 
@@ -512,7 +526,11 @@
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             const logo = document.getElementById('main-brand-logo');
-            if(id === 'dashboard-box' || id === 'admin-panel') { logo.style.display = 'none'; } else { logo.style.display = 'block'; }
+            if(id === 'dashboard-box' || id === 'admin-panel') { 
+                logo.style.display = 'none'; 
+            } else { 
+                logo.style.display = 'block'; 
+            }
         }
 
         function getPlatformMeta(name) {
@@ -698,20 +716,31 @@
         }
 
         async function loadVisitorProfile(username) {
-            const userQuery = await db.collection("users").where("username", "==", username).get();
-            if (userQuery.empty) return showStatus("User not found!", 'error');
-            const data = userQuery.docs[0].data();
-            activeUsername = username; isPreviewMode = true;
-            toggleView('dashboard-box');
-            document.getElementById('dashboard-box').classList.add('preview-mode');
-            document.getElementById('visitor-share-btn').classList.remove('hidden');
-            document.getElementById('side-menu-trigger').style.display = 'none';
-            if (data.theme) document.body.style.background = data.theme;
-            document.getElementById('top-identity').classList.remove('hidden');
-            const vBadge = data.isVerified ? ' <i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
-            document.getElementById('header-user-name').innerHTML = "@" + username + vBadge;
-            if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
-            renderLinks(data.links || []);
+            try {
+                const userQuery = await db.collection("users").where("username", "==", username).get();
+                if (userQuery.empty) {
+                    showStatus("User not found!", 'error');
+                    toggleView('signup-box');
+                    return;
+                }
+                const data = userQuery.docs[0].data();
+                activeUsername = username; isPreviewMode = true;
+                
+                // تحديث الواجهة فوراً
+                toggleView('dashboard-box');
+                document.getElementById('dashboard-box').classList.add('preview-mode');
+                document.getElementById('visitor-share-btn').classList.remove('hidden');
+                document.getElementById('side-menu-trigger').style.display = 'none';
+                if (data.theme) document.body.style.background = data.theme;
+                document.getElementById('top-identity').classList.remove('hidden');
+                const vBadge = data.isVerified ? ' <i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
+                document.getElementById('header-user-name').innerHTML = "@" + username + vBadge;
+                if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
+                renderLinks(data.links || []);
+            } catch (e) {
+                showStatus("Connection Error", 'error');
+                toggleView('signup-box');
+            }
         }
     </script>
 </body>
