@@ -11,6 +11,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth-compat.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         * { 
             box-sizing: border-box; 
@@ -31,21 +34,121 @@
             --glass-color: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.3);
             --accent-glow: 0 0 25px rgba(255, 255, 255, 0.4);
+            --text-color: #ffffff;
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.5);
+            --input-focus-bg: #ffffff;
+            --input-focus-color: #1e3a8a;
+            --card-bg: rgba(255,255,255,0.15);
+            --card-border: rgba(255,255,255,0.2);
         }
+
+        /* ===== LIGHT MODE ===== */
+        body.light-mode {
+            --glass-color: rgba(255,255,255,0.55);
+            --glass-border: rgba(0,0,0,0.12);
+            --text-color: #1e293b;
+            --input-bg: rgba(255,255,255,0.7);
+            --input-border: rgba(0,0,0,0.2);
+            --input-focus-bg: #ffffff;
+            --input-focus-color: #1e3a8a;
+            --card-bg: rgba(255,255,255,0.45);
+            --card-border: rgba(0,0,0,0.1);
+            color: #1e293b !important;
+        }
+
+        body.light-mode {
+            background: linear-gradient(135deg, #c7d2fe 0%, #e9d5ff 50%, #ddd6fe 100%) !important;
+            background-attachment: fixed !important;
+        }
+
+        body.light-mode .container,
+        body.light-mode #landing-page .hero-section,
+        body.light-mode #landing-page .section-card,
+        body.light-mode #analytics-box,
+        body.light-mode #admin-panel {
+            background: var(--glass-color);
+            border-color: var(--glass-border);
+            color: #1e293b;
+        }
+
+        body.light-mode input {
+            color: #1e293b;
+            border-color: var(--input-border);
+            background: var(--input-bg);
+        }
+
+        body.light-mode input::placeholder { color: #64748b; }
+
+        body.light-mode .link-card {
+            background: var(--card-bg);
+            border-color: var(--card-border);
+            color: #1e293b;
+        }
+
+        body.light-mode .side-menu {
+            background: rgba(255,255,255,0.75);
+            border-color: rgba(0,0,0,0.1);
+            color: #1e293b;
+        }
+
+        body.light-mode .menu-item:hover { background: rgba(0,0,0,0.08); }
+
+        body.light-mode .public-url-box {
+            background: rgba(255,255,255,0.4);
+            border-color: rgba(0,0,0,0.2);
+            color: #1e293b;
+        }
+
+        body.light-mode .stat-badge,
+        body.light-mode .feature-card,
+        body.light-mode .step-item {
+            background: rgba(255,255,255,0.5);
+            border-color: rgba(0,0,0,0.1);
+            color: #1e293b;
+        }
+
+        body.light-mode .sub-text,
+        body.light-mode .hero-subtitle,
+        body.light-mode .link-desc { color: #475569; }
+
+        body.light-mode .btn-teardrop {
+            border-color: rgba(0,0,0,0.2);
+            background: rgba(30,58,138,0.15);
+            color: #1e293b;
+        }
+
+        body.light-mode .menu-trigger,
+        body.light-mode #visitor-share-btn,
+        body.light-mode .top-profile-identity {
+            background: rgba(255,255,255,0.6);
+            border-color: rgba(0,0,0,0.15);
+            color: #1e293b;
+        }
+
+        body.light-mode .secret-modal { color: #1e293b; }
+        body.light-mode .secret-modal input { color: #1e293b; background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.2);}
+        body.light-mode .admin-user-card { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.1); color: #1e293b; }
+
+        body.light-mode .analytics-stat-card { background: rgba(255,255,255,0.5); border-color: rgba(0,0,0,0.1); color: #1e293b; }
+        body.light-mode .analytics-link-row { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.1); color: #1e293b; }
+        /* ===== END LIGHT MODE ===== */
 
         body {
             font-family: 'Poppins', sans-serif;
             padding-top: 120px;
-            padding-bottom: 100px;
+            padding-bottom: 50px; /* تقليل الحشو ليتناسب مع التوقيع الجديد */
             background: var(--bg-gradient);
             background-attachment: fixed;
             color: #ffffff;
-            display: flex; justify-content: center; align-items: flex-start;
+            display: flex; 
+            flex-direction: column; /* تغيير لتسمح للعناصر بالاصطفاف رأسياً */
+            align-items: center; 
+            justify-content: flex-start;
             min-height: 100vh;
-            transition: background 0.5s ease;
+            transition: background 0.5s ease, color 0.3s ease;
         }
 
-        /* رسائل الحالة */
         #status-msg {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             padding: 12px 25px; border-radius: 12px; z-index: 10001;
@@ -57,14 +160,13 @@
 
         @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
 
-        /* رؤية كلمة السر */
         .password-container { position: relative; width: 100%; }
         .password-container i {
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
             cursor: pointer; opacity: 0.7; color: #fff; z-index: 5;
         }
+        body.light-mode .password-container i { color: #475569; }
 
-        /* تصميم زر التحميل الصغير داخل الأزرار */
         .btn-loading-icon {
             display: none;
             width: 18px; height: 18px;
@@ -77,10 +179,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .btn-teardrop.loading {
-            pointer-events: none;
-            opacity: 0.8;
-        }
+        .btn-teardrop.loading { pointer-events: none; opacity: 0.8; }
         .btn-teardrop.loading .btn-loading-icon { display: inline-block; }
 
         .secret-modal-overlay {
@@ -104,13 +203,93 @@
         .secret-modal input { text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 1.2rem; }
         .secret-modal .error-msg { color: #ff4d4d; font-size: 0.8rem; margin-top: 5px; display: none; }
 
+        /* ===== QR MODAL ===== */
+        #qr-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(12px);
+            display: none; justify-content: center; align-items: center; z-index: 9998;
+        }
+
+        #qr-modal-overlay.active { display: flex; }
+
+        .qr-modal-box {
+            background: #ffffff;
+            padding: 35px 30px 25px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 300px; width: 90%;
+        }
+
+        .qr-modal-box p { color: #1e293b; font-weight: 700; margin: 15px 0 5px; font-size: 1rem; }
+        .qr-modal-box small { color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 18px; word-break: break-all; }
+
+        .qr-close-btn {
+            margin-top: 5px; padding: 12px 30px; border-radius: 12px;
+            border: none; background: linear-gradient(135deg, #1e3a8a, #6d28d9);
+            color: white; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+            transition: 0.3s; font-family: 'Poppins', sans-serif;
+        }
+        .qr-close-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(109,40,217,0.4); }
+
+        .qr-download-btn {
+            margin-top: 10px; padding: 10px 25px; border-radius: 12px;
+            border: 2px solid #1e3a8a; background: transparent;
+            color: #1e3a8a; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            transition: 0.3s; font-family: 'Poppins', sans-serif; display: block; width: 100%; margin-bottom: 8px;
+        }
+        .qr-download-btn:hover { background: #1e3a8a; color: white; }
+
+        /* ===== ANALYTICS BOX ===== */
+        #analytics-box {
+            background: var(--glass-color); backdrop-filter: blur(35px);
+            padding: 2.5rem 2rem; border-radius: 50px; width: 95%; max-width: 480px;
+            text-align: center; border: 1.5px solid var(--glass-border);
+            animation: slideUp 0.6s ease-out; z-index: 2; position: relative; margin-top: 20px;
+        }
+
+        .analytics-stat-card {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px; padding: 18px 15px; text-align: center;
+            transition: transform 0.3s;
+        }
+        .analytics-stat-card:hover { transform: translateY(-4px); }
+        .analytics-stat-card .stat-num { font-size: 2rem; font-weight: 800; }
+        .analytics-stat-card .stat-label { font-size: 0.75rem; opacity: 0.75; margin-top: 4px; }
+
+        .analytics-stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px; margin: 20px 0;
+        }
+
+        .analytics-link-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 13px 16px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px; margin-bottom: 10px;
+        }
+
+        .analytics-link-name { font-weight: 600; font-size: 0.9rem; text-align: left; }
+        .analytics-click-badge {
+            background: rgba(56,189,248,0.25); border: 1px solid #38bdf8;
+            border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; color: #38bdf8;
+        }
+
+        .chart-container {
+            position: relative; height: 200px; margin: 20px 0 10px;
+            background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ===== BRAND LOGO ===== */
         .brand-logo {
             position: absolute; top: 0px; right: 0px; width: 180px; height: auto;
             z-index: 1001; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.4));
             transition: transform 0.3s ease;
             max-width: 100%; cursor: pointer;
         }
-
         .brand-logo:hover { transform: scale(1.03); }
 
         .gold-shiny {
@@ -122,7 +301,6 @@
             animation: shine 3s linear infinite;
             display: inline-block;
         }
-
         @keyframes shine { to { background-position: 200% center; } }
 
         .menu-trigger {
@@ -181,9 +359,8 @@
             background: rgba(255, 255, 255, 0.1);
             color: #ffffff; outline: none; box-sizing: border-box; 
             text-align: left; padding-left: 20px; font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease; font-family: 'Poppins', sans-serif;
         }
-
         input:focus { border-color: #ffffff; background: #ffffff; color: #1e3a8a; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
 
         .btn-teardrop {
@@ -191,7 +368,7 @@
             border: 1px solid rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.2);
             color: white; font-weight: 600; cursor: pointer; transition: 0.4s;
             text-transform: uppercase; letter-spacing: 2px;
-            position: relative;
+            position: relative; font-family: 'Poppins', sans-serif;
         }
         .btn-teardrop:hover:not(:disabled) { transform: translateY(-5px); box-shadow: var(--accent-glow); }
         .btn-teardrop:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -216,7 +393,7 @@
         .link-text-content { display: flex; flex-direction: column; }
         .link-desc { font-size: 0.75rem; opacity: 0.7; font-weight: 300; margin-top: 2px; }
 
-        .actions-box { display: flex; gap: 12px; }
+        .actions-box { display: flex; gap: 12px; align-items: center; }
         .actions-box i { cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
 
         .public-url-box {
@@ -225,9 +402,19 @@
             word-break: break-all;
         }
 
+        /* تم تعديل التوقيع ليكون في الأسفل تماماً ويحتاج للتمرير لرؤيته */
         .footer-signature {
-            position: absolute; bottom: 8px; right: 10px;
-            font-size: 0.85rem; opacity: 0.8; z-index: 10;
+            position: relative;
+            text-align: center;
+            width: 100%;
+            margin-top: 50px;       /* مسافة تضمن النزول */
+            margin-bottom: 30px;
+            padding: 20px 0;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            clear: both;
+            display: block;
+            z-index: 10;
         }
 
         .hidden { display: none !important; }
@@ -259,96 +446,50 @@
 
         /* ========== LANDING PAGE STYLES ========== */
         #landing-page {
-            width: 95%;
-            max-width: 480px;
-            z-index: 2;
-            position: relative;
-            margin-top: 20px;
-            animation: slideUp 0.6s ease-out;
+            width: 95%; max-width: 480px; z-index: 2; position: relative;
+            margin-top: 20px; animation: slideUp 0.6s ease-out;
         }
 
-        /* Hero Section */
         .hero-section {
-            background: var(--glass-color);
-            backdrop-filter: blur(35px);
-            padding: 3.5rem 2.5rem 2.5rem;
-            border-radius: 50px;
-            text-align: center;
-            border: 1.5px solid var(--glass-border);
-            overflow: hidden;
-            position: relative;
+            background: var(--glass-color); backdrop-filter: blur(35px);
+            padding: 3.5rem 2.5rem 2.5rem; border-radius: 50px;
+            text-align: center; border: 1.5px solid var(--glass-border);
+            overflow: hidden; position: relative;
         }
-
         .hero-section::before {
-            content: '';
-            position: absolute;
-            top: -80px; left: -80px;
+            content: ''; position: absolute; top: -80px; left: -80px;
             width: 250px; height: 250px;
             background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
+            border-radius: 50%; pointer-events: none;
         }
-
         .hero-section::after {
-            content: '';
-            position: absolute;
-            bottom: -60px; right: -60px;
+            content: ''; position: absolute; bottom: -60px; right: -60px;
             width: 200px; height: 200px;
             background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
+            border-radius: 50%; pointer-events: none;
         }
 
         .hero-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 24px;
+            width: 80px; height: 80px; margin: 0 auto 20px;
+            background: rgba(255,255,255,0.15); border-radius: 24px;
             border: 1.5px solid rgba(255,255,255,0.3);
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.2rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            font-size: 2.2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             animation: float 3s ease-in-out infinite;
         }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-
-        .hero-title {
-            font-size: 2.8rem;
-            font-weight: 800;
-            margin: 0 0 10px;
-            line-height: 1.1;
-        }
-
-        .hero-subtitle {
-            font-size: 1rem;
-            opacity: 0.85;
-            line-height: 1.7;
-            margin: 0 0 30px;
-        }
+        .hero-title { font-size: 2.8rem; font-weight: 800; margin: 0 0 10px; line-height: 1.1; }
+        .hero-subtitle { font-size: 1rem; opacity: 0.85; line-height: 1.7; margin: 0 0 30px; }
 
         .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;
         }
-
         .stat-badge {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50px;
-            padding: 8px 18px;
-            font-size: 0.82rem;
-            font-weight: 600;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px; padding: 8px 18px; font-size: 0.82rem; font-weight: 600;
             display: flex; align-items: center; gap: 6px;
         }
-
         .stat-badge i { opacity: 0.8; }
 
         .hero-cta {
@@ -363,120 +504,65 @@
 
         .hero-login-link {
             display: block; margin-top: 18px; cursor: pointer;
-            text-decoration: underline; font-size: 0.9rem; opacity: 0.8;
-            transition: opacity 0.2s;
+            text-decoration: underline; font-size: 0.9rem; opacity: 0.8; transition: opacity 0.2s;
         }
         .hero-login-link:hover { opacity: 1; }
 
-        /* How It Works Section */
         .section-card {
-            background: var(--glass-color);
-            backdrop-filter: blur(35px);
-            padding: 2.5rem;
-            border-radius: 40px;
-            border: 1.5px solid var(--glass-border);
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
+            background: var(--glass-color); backdrop-filter: blur(35px);
+            padding: 2.5rem; border-radius: 40px; border: 1.5px solid var(--glass-border);
+            margin-top: 20px; position: relative; overflow: hidden;
         }
 
         .section-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-align: center;
-            margin: 0 0 25px;
+            font-size: 1.4rem; font-weight: 700; text-align: center; margin: 0 0 25px;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-
         .section-title span { font-size: 1.3rem; }
 
-        /* Steps */
-        .steps-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
+        .steps-list { display: flex; flex-direction: column; gap: 16px; }
         .step-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            padding: 16px;
-            background: rgba(255,255,255,0.07);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease, background 0.3s ease;
+            display: flex; align-items: flex-start; gap: 16px; padding: 16px;
+            background: rgba(255,255,255,0.07); border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s ease, background 0.3s ease;
         }
-
-        .step-item:hover {
-            transform: translateX(6px);
-            background: rgba(255,255,255,0.13);
-        }
+        .step-item:hover { transform: translateX(6px); background: rgba(255,255,255,0.13); }
 
         .step-number {
             width: 42px; height: 42px; min-width: 42px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 14px;
+            background: rgba(255,255,255,0.2); border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.3);
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 1.1rem;
         }
-
         .step-content { flex: 1; }
         .step-content strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
         .step-content p { font-size: 0.82rem; opacity: 0.75; margin: 0; line-height: 1.5; }
 
-        /* Features Grid */
-        .features-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .feature-card {
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 22px;
-            padding: 20px 16px;
-            text-align: center;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 22px; padding: 20px 16px; text-align: center;
             transition: transform 0.3s ease, background 0.3s ease;
         }
+        .feature-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.14); }
+        .feature-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+        .feature-card strong { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+        .feature-card p { font-size: 0.75rem; opacity: 0.7; margin: 0; line-height: 1.5; }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.14);
-        }
-
-        .feature-icon {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .feature-card strong {
-            display: block;
-            font-size: 0.88rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .feature-card p {
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin: 0;
-            line-height: 1.5;
-        }
-
-        /* Divider */
         .section-divider {
-            text-align: center;
-            margin: 25px 0 5px;
-            font-size: 0.8rem;
-            opacity: 0.5;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            text-align: center; margin: 25px 0 5px; font-size: 0.8rem;
+            opacity: 0.5; letter-spacing: 2px; text-transform: uppercase;
         }
         /* ========== END LANDING PAGE STYLES ========== */
+
+        /* Dashboard action buttons row */
+        .dashboard-action-btns {
+            display: flex; gap: 10px; margin-top: 15px;
+        }
+        .dashboard-action-btns .btn-teardrop {
+            margin-top: 0; font-size: 0.75rem; padding: 14px 10px; letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
@@ -497,13 +583,57 @@
         </div>
     </div>
 
+    <div id="qr-modal-overlay">
+        <div class="qr-modal-box">
+            <div id="qr-code-container"></div>
+            <p>Scan to visit profile</p>
+            <small id="qr-url-label"></small>
+            <button class="qr-download-btn" onclick="downloadQR()">
+                <i class="fa-solid fa-download"></i> Download QR
+            </button>
+            <button class="qr-close-btn" onclick="closeQRModal()">Close</button>
+        </div>
+    </div>
+
     <div id="admin-panel" class="container hidden" style="max-width: 550px;">
         <h1 class="gold-shiny">Admin Panel</h1>
         <p class="sub-text">Search and manage user verification</p>
         <input type="text" id="admin-search" placeholder="Search users by name..." oninput="filterAdminUsers()">
-        <div id="admin-users-list" style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
-            </div>
+        <div id="admin-users-list" style="margin-top: 20px; max-height: 400px; overflow-y: auto;"></div>
         <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.1); margin-top: 20px;">Back to Dashboard</button>
+    </div>
+
+    <div id="analytics-box" class="hidden" style="display:none;">
+        <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:5px;">📊 Analytics</h1>
+        <p class="sub-text" style="margin-bottom:20px;">Performance overview for <strong id="analytics-username"></strong></p>
+
+        <div class="analytics-stats-grid">
+            <div class="analytics-stat-card">
+                <div class="stat-num" id="stat-total-clicks">0</div>
+                <div class="stat-label">Total Clicks</div>
+            </div>
+            <div class="analytics-stat-card">
+                <div class="stat-num" id="stat-total-links">0</div>
+                <div class="stat-label">Total Links</div>
+            </div>
+            <div class="analytics-stat-card">
+                <div class="stat-num" id="stat-top-link">—</div>
+                <div class="stat-label">Best Link</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="analytics-chart"></canvas>
+        </div>
+
+        <div style="margin-top: 20px; text-align: left;">
+            <p style="font-weight: 700; margin-bottom: 12px; font-size: 0.95rem; opacity: 0.9;">Link Performance</p>
+            <div id="analytics-links-breakdown"></div>
+        </div>
+
+        <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.1); margin-top: 25px;">
+            ← Back to Dashboard
+        </button>
     </div>
 
     <img id="main-brand-logo" src="https://i.postimg.cc/wj9vh1rY/file-00000000d47471f8bba9beefdc85fae3-(1).png" alt="Logo" class="brand-logo" onclick="handleLogoClick()">
@@ -524,6 +654,10 @@
         <div class="menu-item" onclick="togglePreview()">
             <i class="fa-solid fa-eye"></i> <span id="preview-text">Preview Profile</span>
         </div>
+        <div class="menu-item" onclick="toggleDarkLight()">
+            <i id="theme-mode-icon" class="fa-solid fa-moon"></i>
+            <span id="theme-mode-label">Light Mode</span>
+        </div>
         <div class="menu-item" onclick="toggleSubmenu()">
             <i class="fa-solid fa-palette"></i> Change Theme <i class="fa-solid fa-chevron-down" style="margin-left: auto; font-size: 0.7rem;"></i>
         </div>
@@ -543,10 +677,7 @@
         </div>
     </div>
 
-    <!-- ========== LANDING PAGE ========== -->
     <div id="landing-page">
-
-        <!-- Hero -->
         <div class="hero-section">
             <div class="hero-logo">🔗</div>
             <h1 class="hero-title gold-shiny">TapLinks</h1>
@@ -564,7 +695,6 @@
             <span class="hero-login-link" onclick="showAuthSection('login-box')">Already have an account? Sign In</span>
         </div>
 
-        <!-- How It Works -->
         <div class="section-card">
             <p class="section-title"><span>⚡</span> How It Works</p>
             <div class="steps-list">
@@ -599,7 +729,6 @@
             </div>
         </div>
 
-        <!-- Features -->
         <div class="section-card">
             <p class="section-title"><span>✨</span> Features</p>
             <div class="features-grid">
@@ -636,7 +765,6 @@
             </div>
         </div>
 
-        <!-- Final CTA -->
         <div class="section-card" style="text-align: center;">
             <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 10px;">Ready to build your presence?</p>
             <p style="opacity: 0.8; font-size: 0.9rem; margin: 0 0 25px; line-height: 1.6;">Join creators who already use TapLinks to share their world in one link.</p>
@@ -644,10 +772,7 @@
                 Create My Profile Now
             </button>
         </div>
-
     </div>
-    <!-- ========== END LANDING PAGE ========== -->
-
     <div id="signup-box" class="container hidden">
         <h1>WELCOME</h1>
         <p class="sub-text">Build your professional presence in a vibrant, elegant space.</p>
@@ -690,6 +815,16 @@
         <input type="text" id="desc" placeholder="Short Description (Optional)">
         <button class="btn-teardrop" id="submit-btn" onclick="addLink()">+ Add New Link</button>
         <button class="btn-teardrop hidden" id="cancel-edit-btn" onclick="cancelEdit()" style="background: rgba(239, 68, 68, 0.3); margin-top: 5px; font-size: 0.8rem;">Cancel Edit</button>
+
+        <div class="dashboard-action-btns">
+            <button class="btn-teardrop" onclick="showQRCode()" style="background: rgba(56,189,248,0.2); border-color: rgba(56,189,248,0.5);">
+                📱 QR Code
+            </button>
+            <button class="btn-teardrop" onclick="showAnalytics()" style="background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5);">
+                📊 Analytics
+            </button>
+        </div>
+
         <div id="links-list" style="margin-top: 30px;"></div>
         <div class="public-url-box" onclick="copyToClipboard()">
             <small style="opacity:0.8">Your professional link:</small><br>
@@ -720,8 +855,9 @@
         let logoClicks = 0;
         let lastClickTime = 0;
         let allUsersForAdmin = [];
+        let analyticsChartInstance = null;
 
-        // تحسين حالة الأزرار عند الضغط
+        // ===== LOADING BUTTON =====
         function setBtnLoading(btnId, isLoading, defaultText) {
             const btn = document.getElementById(btnId);
             const textSpan = btn.querySelector('.btn-text');
@@ -734,6 +870,7 @@
             }
         }
 
+        // ===== INITIAL URL CHECK =====
         (function initialCheck() {
             const params = new URLSearchParams(window.location.search);
             const userParam = params.get('u');
@@ -746,6 +883,14 @@
         })();
 
         window.onload = () => {
+            // Restore dark/light mode
+            const savedMode = localStorage.getItem('colorMode');
+            if (savedMode === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('theme-mode-icon').className = 'fa-solid fa-sun';
+                document.getElementById('theme-mode-label').innerText = 'Dark Mode';
+            }
+
             const params = new URLSearchParams(window.location.search);
             const userParam = params.get('u');
             if (userParam) { 
@@ -755,14 +900,152 @@
             }
         };
 
+        // ===== DARK / LIGHT MODE =====
+        function toggleDarkLight() {
+            const isLight = document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-mode-icon');
+            const label = document.getElementById('theme-mode-label');
+            if (isLight) {
+                icon.className = 'fa-solid fa-sun';
+                label.innerText = 'Dark Mode';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+                label.innerText = 'Light Mode';
+            }
+            localStorage.setItem('colorMode', isLight ? 'light' : 'dark');
+            if (activeUserUID) {
+                db.collection("users").doc(activeUserUID).update({ colorMode: isLight ? 'light' : 'dark' });
+            }
+        }
+
+        // ===== QR CODE =====
+        function showQRCode() {
+            const profileUrl = window.location.origin + window.location.pathname + "?u=" + activeUsername;
+            const container = document.getElementById('qr-code-container');
+            container.innerHTML = '';
+            document.getElementById('qr-url-label').innerText = profileUrl;
+            new QRCode(container, {
+                text: profileUrl,
+                width: 200, height: 200,
+                colorDark: "#1e3a8a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            document.getElementById('qr-modal-overlay').classList.add('active');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-modal-overlay').classList.remove('active');
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qr-code-container canvas');
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.download = 'taplinks-qr-' + activeUsername + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // ===== ANALYTICS =====
+        async function showAnalytics() {
+            const userDoc = await db.collection("users").doc(activeUserUID).get();
+            const data = userDoc.data();
+            const links = data.links || [];
+
+            document.getElementById('analytics-username').innerText = '@' + activeUsername;
+
+            const totalClicks = links.reduce((sum, l) => sum + (l.clicks || 0), 0);
+            document.getElementById('stat-total-clicks').innerText = totalClicks;
+            document.getElementById('stat-total-links').innerText = links.length;
+
+            const topLink = links.reduce((best, l) => (!best || (l.clicks || 0) > (best.clicks || 0)) ? l : best, null);
+            document.getElementById('stat-top-link').innerText = topLink ? topLink.name.slice(0, 6) : '—';
+
+            // Chart
+            const ctx = document.getElementById('analytics-chart').getContext('2d');
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+            const labels = links.map(l => l.name);
+            const clickData = links.map(l => l.clicks || 0);
+            const isLight = document.body.classList.contains('light-mode');
+            const textColor = isLight ? '#1e293b' : '#ffffff';
+
+            analyticsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Clicks',
+                        data: clickData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: textColor, stepSize: 1 },
+                            grid: { color: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Per-link breakdown
+            const breakdown = document.getElementById('analytics-links-breakdown');
+            breakdown.innerHTML = '';
+            if (links.length === 0) {
+                breakdown.innerHTML = '<p style="opacity:0.5; text-align:center; font-size:0.85rem;">No links yet.</p>';
+            } else {
+                const sorted = [...links].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+                sorted.forEach(l => {
+                    const row = document.createElement('div');
+                    row.className = 'analytics-link-row';
+                    const pct = totalClicks > 0 ? Math.round(((l.clicks || 0) / totalClicks) * 100) : 0;
+                    row.innerHTML = `
+                        <div>
+                            <div class="analytics-link-name">${l.name}</div>
+                            <div style="font-size:0.72rem; opacity:0.6; margin-top:3px;">${pct}% of total clicks</div>
+                        </div>
+                        <div class="analytics-click-badge">${l.clicks || 0} clicks</div>
+                    `;
+                    breakdown.appendChild(row);
+                });
+            }
+
+            // Show analytics view
+            document.getElementById('landing-page').style.display = 'none';
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            const analyticsBox = document.getElementById('analytics-box');
+            analyticsBox.classList.remove('hidden');
+            analyticsBox.style.display = 'block';
+            document.getElementById('main-brand-logo').style.display = 'none';
+        }
+
+        // ===== NAVIGATION =====
         function showLandingPage() {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById('analytics-box').style.display = 'none';
+            document.getElementById('analytics-box').classList.add('hidden');
             document.getElementById('landing-page').style.display = 'block';
             document.getElementById('main-brand-logo').style.display = 'block';
         }
 
         function showAuthSection(id) {
             document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('analytics-box').style.display = 'none';
+            document.getElementById('analytics-box').classList.add('hidden');
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             document.getElementById('main-brand-logo').style.display = 'block';
@@ -787,6 +1070,7 @@
             setTimeout(() => { el.style.display = 'none'; }, 3000);
         }
 
+        // ===== LOGO EASTER EGG =====
         function handleLogoClick() {
             const currentTime = new Date().getTime();
             if (currentTime - lastClickTime > 1000) { logoClicks = 0; }
@@ -817,6 +1101,7 @@
             }
         }
 
+        // ===== ADMIN =====
         async function loadAdminPanel() {
             toggleView('admin-panel');
             const list = document.getElementById('admin-users-list');
@@ -864,6 +1149,7 @@
             } catch(e) { showStatus(e.message, 'error'); }
         }
 
+        // ===== MENU =====
         function toggleMenu() { document.getElementById('side-menu').classList.toggle('active'); }
         function toggleSubmenu() { document.getElementById('theme-submenu').classList.toggle('open'); }
 
@@ -894,13 +1180,24 @@
             const dash = document.getElementById('dashboard-box');
             const btnText = document.getElementById('preview-text');
             const statusText = document.getElementById('user-status-text');
-            if (isPreviewMode) { dash.classList.add('preview-mode'); btnText.innerText = "Back to Editor"; statusText.style.visibility = 'hidden'; toggleMenu(); } 
-            else { dash.classList.remove('preview-mode'); btnText.innerText = "Preview Profile"; statusText.style.visibility = 'visible'; toggleMenu(); }
+            if (isPreviewMode) { 
+                dash.classList.add('preview-mode'); 
+                btnText.innerText = "Back to Editor"; 
+                statusText.style.visibility = 'hidden'; 
+                toggleMenu(); 
+            } else { 
+                dash.classList.remove('preview-mode'); 
+                btnText.innerText = "Preview Profile"; 
+                statusText.style.visibility = 'visible'; 
+                toggleMenu(); 
+            }
             renderLinks();
         }
 
         function toggleView(id) {
             document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('analytics-box').style.display = 'none';
+            document.getElementById('analytics-box').classList.add('hidden');
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             const logo = document.getElementById('main-brand-logo');
@@ -911,6 +1208,7 @@
             }
         }
 
+        // ===== PLATFORM META =====
         function getPlatformMeta(name) {
             const n = name.toLowerCase().trim();
             if (n.includes('instagram')) return { icon: 'fa-brands fa-instagram', color: '#E1306C' };
@@ -922,14 +1220,13 @@
             return { icon: 'fa-solid fa-link', color: '#ffffff' };
         }
 
+        // ===== AUTH =====
         async function registerAndLogin() {
             const email = document.getElementById('reg-email').value.trim();
             const user = document.getElementById('reg-user').value.trim().toLowerCase();
             const pass = document.getElementById('reg-pass').value.trim();
             if (!email || !user || !pass) return showStatus("Fill all details", 'error');
-
             setBtnLoading('btn-signup', true);
-
             try {
                 const userQuery = await db.collection("users").where("username", "==", user).get();
                 if (!userQuery.empty) {
@@ -937,7 +1234,7 @@
                     return showStatus("Username taken", 'error');
                 }
                 const res = await auth.createUserWithEmailAndPassword(email, pass);
-                const userData = { uid: res.user.uid, username: user, links: [], profilePic: null, isVerified: false, theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)' };
+                const userData = { uid: res.user.uid, username: user, links: [], profilePic: null, isVerified: false, theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)', colorMode: 'dark' };
                 await db.collection("users").doc(res.user.uid).set(userData);
                 enterDashboard(res.user.uid, userData);
             } catch (e) { 
@@ -950,9 +1247,7 @@
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
             if (!email || !pass) return;
-
             setBtnLoading('btn-login', true);
-
             try {
                 const res = await auth.signInWithEmailAndPassword(email, pass);
                 const userDoc = await db.collection("users").doc(res.user.uid).get();
@@ -974,9 +1269,17 @@
             document.getElementById('link-text').innerText = window.location.origin + window.location.pathname + "?u=" + activeUsername;
             if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
             if (data.theme) { document.body.style.background = data.theme; }
+            // Restore color mode from Firestore
+            if (data.colorMode === 'light' && !document.body.classList.contains('light-mode')) {
+                document.body.classList.add('light-mode');
+                document.getElementById('theme-mode-icon').className = 'fa-solid fa-sun';
+                document.getElementById('theme-mode-label').innerText = 'Dark Mode';
+                localStorage.setItem('colorMode', 'light');
+            }
             renderLinks(data.links || []);
         }
 
+        // ===== LINKS =====
         async function addLink() {
             const name = document.getElementById('platform').value.trim();
             const url = document.getElementById('url').value.trim();
@@ -1038,7 +1341,7 @@
                     </div>
                     <div class="actions-box">
                         ${!isPreviewMode ? `
-                        <span class="click-count"><i class="fa-solid fa-chart-simple"></i> ${l.clicks || 0}</span>
+                        <span class="click-count" style="font-size:0.8rem; opacity:0.8;"><i class="fa-solid fa-chart-simple"></i> ${l.clicks || 0}</span>
                         <i class="fa-solid fa-pen-to-square" style="color:#fbbf24" onclick="event.preventDefault(); editLink(${l.id})"></i>
                         <i class="fa-solid fa-trash" style="color:#ef4444" onclick="event.preventDefault(); deleteLink(${l.id})"></i>
                         ` : ''}
@@ -1124,6 +1427,10 @@
                 document.getElementById('visitor-share-btn').classList.remove('hidden');
                 document.getElementById('side-menu-trigger').style.display = 'none';
                 if (data.theme) document.body.style.background = data.theme;
+                // Apply visitor's color mode preference
+                if (data.colorMode === 'light' && !document.body.classList.contains('light-mode')) {
+                    document.body.classList.add('light-mode');
+                }
                 document.getElementById('top-identity').classList.remove('hidden');
                 const vBadge = data.isVerified ? ' <i class="fa-solid fa-circle-check" style="color: #38bdf8; margin-left: 5px; font-size: 0.9rem;"></i>' : '';
                 document.getElementById('header-user-name').innerHTML = "@" + username + vBadge;
