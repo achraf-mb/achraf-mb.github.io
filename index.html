@@ -137,12 +137,12 @@
         body {
             font-family: 'Poppins', sans-serif;
             padding-top: 120px;
-            padding-bottom: 50px; /* تقليل الحشو ليتناسب مع التوقيع الجديد */
+            padding-bottom: 50px;
             background: var(--bg-gradient);
             background-attachment: fixed;
             color: #ffffff;
             display: flex; 
-            flex-direction: column; /* تغيير لتسمح للعناصر بالاصطفاف رأسياً */
+            flex-direction: column;
             align-items: center; 
             justify-content: flex-start;
             min-height: 100vh;
@@ -402,12 +402,11 @@
             word-break: break-all;
         }
 
-        /* تم تعديل التوقيع ليكون في الأسفل تماماً ويحتاج للتمرير لرؤيته */
         .footer-signature {
             position: relative;
             text-align: center;
             width: 100%;
-            margin-top: 50px;       /* مسافة تضمن النزول */
+            margin-top: 50px;
             margin-bottom: 30px;
             padding: 20px 0;
             font-size: 0.8rem;
@@ -498,7 +497,7 @@
             background: rgba(255, 255, 255, 0.25);
             color: white; font-weight: 700; cursor: pointer; transition: 0.4s;
             text-transform: uppercase; letter-spacing: 2px; font-size: 1rem;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .hero-cta:hover { transform: translateY(-5px); box-shadow: var(--accent-glow); background: rgba(255,255,255,0.35); }
 
@@ -518,7 +517,7 @@
             font-size: 1.4rem; font-weight: 700; text-align: center; margin: 0 0 25px;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .section-title span { font-size: 1.3rem; }
+        .section-title i { font-size: 1.2rem; opacity: 0.9; }
 
         .steps-list { display: flex; flex-direction: column; gap: 16px; }
         .step-item {
@@ -546,7 +545,8 @@
             transition: transform 0.3s ease, background 0.3s ease;
         }
         .feature-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.14); }
-        .feature-icon { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+        .feature-icon { font-size: 1.6rem; margin-bottom: 10px; display: block; opacity: 0.9; }
+        .feature-icon i { font-size: 1.6rem; }
         .feature-card strong { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
         .feature-card p { font-size: 0.75rem; opacity: 0.7; margin: 0; line-height: 1.5; }
 
@@ -562,7 +562,10 @@
         }
         .dashboard-action-btns .btn-teardrop {
             margin-top: 0; font-size: 0.75rem; padding: 14px 10px; letter-spacing: 1px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+
+        .analytics-title-icon { font-size: 1.6rem; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -604,7 +607,11 @@
     </div>
 
     <div id="analytics-box" class="hidden" style="display:none;">
-        <h1 style="font-weight:800; font-size:1.8rem; margin-bottom:5px;">📊 Analytics</h1>
+        <!-- Analytics title with FA icon instead of emoji -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:5px;">
+            <i class="fa-solid fa-chart-column" style="font-size:1.8rem; color:#a5b4fc;"></i>
+            <h1 style="font-weight:800; font-size:1.8rem; margin:0;">Analytics</h1>
+        </div>
         <p class="sub-text" style="margin-bottom:20px;">Performance overview for <strong id="analytics-username"></strong></p>
 
         <div class="analytics-stats-grid">
@@ -627,12 +634,14 @@
         </div>
 
         <div style="margin-top: 20px; text-align: left;">
-            <p style="font-weight: 700; margin-bottom: 12px; font-size: 0.95rem; opacity: 0.9;">Link Performance</p>
+            <p style="font-weight: 700; margin-bottom: 12px; font-size: 0.95rem; opacity: 0.9;">
+                <i class="fa-solid fa-ranking-star" style="margin-right:6px; opacity:0.8;"></i>Link Performance
+            </p>
             <div id="analytics-links-breakdown"></div>
         </div>
 
         <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.1); margin-top: 25px;">
-            ← Back to Dashboard
+            <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> Back to Dashboard
         </button>
     </div>
 
@@ -679,24 +688,31 @@
 
     <div id="landing-page">
         <div class="hero-section">
-            <div class="hero-logo">🔗</div>
+            <!-- Hero logo: FA icon instead of emoji -->
+            <div class="hero-logo">
+                <i class="fa-solid fa-link" style="color: rgba(255,255,255,0.9);"></i>
+            </div>
             <h1 class="hero-title gold-shiny">TapLinks</h1>
             <p class="hero-subtitle">
                 Your entire online presence, unified in one elegant link. Share everything — one tap away.
             </p>
             <div class="hero-stats">
                 <div class="stat-badge"><i class="fa-solid fa-bolt"></i> Instant Setup</div>
-                <div class="stat-badge"><i class="fa-solid fa-shield-halved"></i> Secure & Private</div>
+                <div class="stat-badge"><i class="fa-solid fa-shield-halved"></i> Secure &amp; Private</div>
                 <div class="stat-badge"><i class="fa-solid fa-chart-line"></i> Track Clicks</div>
             </div>
+            <!-- CTA: FA rocket icon instead of emoji -->
             <button class="hero-cta" onclick="showAuthSection('signup-box')">
-                🚀 Get Started — It's Free
+                <i class="fa-solid fa-rocket"></i> Get Started — It's Free
             </button>
             <span class="hero-login-link" onclick="showAuthSection('login-box')">Already have an account? Sign In</span>
         </div>
 
         <div class="section-card">
-            <p class="section-title"><span>⚡</span> How It Works</p>
+            <!-- Section title: FA icon instead of emoji -->
+            <p class="section-title">
+                <i class="fa-solid fa-circle-nodes"></i> How It Works
+            </p>
             <div class="steps-list">
                 <div class="step-item">
                     <div class="step-number">1</div>
@@ -730,35 +746,39 @@
         </div>
 
         <div class="section-card">
-            <p class="section-title"><span>✨</span> Features</p>
+            <!-- Section title: FA icon instead of emoji -->
+            <p class="section-title">
+                <i class="fa-solid fa-star"></i> Features
+            </p>
             <div class="features-grid">
                 <div class="feature-card">
-                    <span class="feature-icon">🎨</span>
+                    <!-- Feature icons: FA instead of emoji -->
+                    <span class="feature-icon"><i class="fa-solid fa-swatchbook" style="color:#c084fc;"></i></span>
                     <strong>Custom Themes</strong>
                     <p>Choose from beautiful gradient themes to match your personal brand.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">📊</span>
+                    <span class="feature-icon"><i class="fa-solid fa-chart-bar" style="color:#60a5fa;"></i></span>
                     <strong>Click Analytics</strong>
                     <p>See exactly how many times each of your links has been tapped.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">🔀</span>
+                    <span class="feature-icon"><i class="fa-solid fa-arrows-up-down" style="color:#34d399;"></i></span>
                     <strong>Drag to Reorder</strong>
                     <p>Rearrange your links in any order with a simple drag and drop.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">🖼️</span>
+                    <span class="feature-icon"><i class="fa-solid fa-image-portrait" style="color:#f472b6;"></i></span>
                     <strong>Profile Picture</strong>
                     <p>Upload your own photo so visitors always know they're in the right place.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">✅</span>
+                    <span class="feature-icon"><i class="fa-solid fa-circle-check" style="color:#38bdf8;"></i></span>
                     <strong>Verified Badge</strong>
                     <p>Get a blue verification badge to stand out as a trusted creator.</p>
                 </div>
                 <div class="feature-card">
-                    <span class="feature-icon">📱</span>
+                    <span class="feature-icon"><i class="fa-solid fa-mobile-screen-button" style="color:#fbbf24;"></i></span>
                     <strong>Mobile First</strong>
                     <p>Looks perfect on every phone, tablet, and screen size — always.</p>
                 </div>
@@ -769,10 +789,11 @@
             <p style="font-size: 1.5rem; font-weight: 800; margin: 0 0 10px;">Ready to build your presence?</p>
             <p style="opacity: 0.8; font-size: 0.9rem; margin: 0 0 25px; line-height: 1.6;">Join creators who already use TapLinks to share their world in one link.</p>
             <button class="hero-cta" onclick="showAuthSection('signup-box')">
-                Create My Profile Now
+                <i class="fa-solid fa-user-plus"></i> Create My Profile Now
             </button>
         </div>
     </div>
+
     <div id="signup-box" class="container hidden">
         <h1>WELCOME</h1>
         <p class="sub-text">Build your professional presence in a vibrant, elegant space.</p>
@@ -786,7 +807,9 @@
             <span class="btn-loading-icon"></span><span class="btn-text">Create Account</span>
         </button>
         <span style="display:block; margin-top:25px; cursor:pointer; text-decoration:underline;" onclick="toggleView('login-box')">Already have an account? Login</span>
-        <span style="display:block; margin-top:12px; cursor:pointer; text-decoration:underline; font-size:0.85rem; opacity:0.7;" onclick="showLandingPage()">← Back to Home</span>
+        <span style="display:block; margin-top:12px; cursor:pointer; text-decoration:underline; font-size:0.85rem; opacity:0.7;" onclick="showLandingPage()">
+            <i class="fa-solid fa-arrow-left" style="margin-right:4px;"></i> Back to Home
+        </span>
     </div>
 
     <div id="login-box" class="container hidden">
@@ -801,7 +824,9 @@
             <span class="btn-loading-icon"></span><span class="btn-text">Sign In</span>
         </button>
         <span style="display:block; margin-top:25px; cursor:pointer; text-decoration:underline;" onclick="toggleView('signup-box')">New here? Sign Up</span>
-        <span style="display:block; margin-top:12px; cursor:pointer; text-decoration:underline; font-size:0.85rem; opacity:0.7;" onclick="showLandingPage()">← Back to Home</span>
+        <span style="display:block; margin-top:12px; cursor:pointer; text-decoration:underline; font-size:0.85rem; opacity:0.7;" onclick="showLandingPage()">
+            <i class="fa-solid fa-arrow-left" style="margin-right:4px;"></i> Back to Home
+        </span>
     </div>
 
     <div id="dashboard-box" class="container hidden">
@@ -813,26 +838,32 @@
         <input type="text" id="platform" placeholder="Platform Name (e.g. Instagram)">
         <input type="text" id="url" placeholder="Paste URL (https://...)">
         <input type="text" id="desc" placeholder="Short Description (Optional)">
-        <button class="btn-teardrop" id="submit-btn" onclick="addLink()">+ Add New Link</button>
-        <button class="btn-teardrop hidden" id="cancel-edit-btn" onclick="cancelEdit()" style="background: rgba(239, 68, 68, 0.3); margin-top: 5px; font-size: 0.8rem;">Cancel Edit</button>
+        <button class="btn-teardrop" id="submit-btn" onclick="addLink()">
+            <i class="fa-solid fa-plus" style="margin-right:6px;"></i> Add New Link
+        </button>
+        <button class="btn-teardrop hidden" id="cancel-edit-btn" onclick="cancelEdit()" style="background: rgba(239, 68, 68, 0.3); margin-top: 5px; font-size: 0.8rem;">
+            <i class="fa-solid fa-xmark" style="margin-right:6px;"></i> Cancel Edit
+        </button>
 
         <div class="dashboard-action-btns">
             <button class="btn-teardrop" onclick="showQRCode()" style="background: rgba(56,189,248,0.2); border-color: rgba(56,189,248,0.5);">
-                📱 QR Code
+                <i class="fa-solid fa-qrcode"></i> QR Code
             </button>
             <button class="btn-teardrop" onclick="showAnalytics()" style="background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5);">
-                📊 Analytics
+                <i class="fa-solid fa-chart-column"></i> Analytics
             </button>
         </div>
 
         <div id="links-list" style="margin-top: 30px;"></div>
         <div class="public-url-box" onclick="copyToClipboard()">
-            <small style="opacity:0.8">Your professional link:</small><br>
+            <small style="opacity:0.8">
+                <i class="fa-solid fa-link" style="margin-right:5px;"></i>Your professional link:
+            </small><br>
             <strong id="link-text" style="font-family: monospace; font-size: 1.1rem;"></strong>
         </div>
     </div>
 
-    <div class="footer-signature">Designed & Developed by Achraf</div>
+    <div class="footer-signature">Designed &amp; Developed by Achraf</div>
 
     <script>
         const firebaseConfig = {
@@ -1269,7 +1300,6 @@
             document.getElementById('link-text').innerText = window.location.origin + window.location.pathname + "?u=" + activeUsername;
             if (data.profilePic) { document.getElementById('profile-display').innerHTML = `<img src="${data.profilePic}">`; }
             if (data.theme) { document.body.style.background = data.theme; }
-            // Restore color mode from Firestore
             if (data.colorMode === 'light' && !document.body.classList.contains('light-mode')) {
                 document.body.classList.add('light-mode');
                 document.getElementById('theme-mode-icon').className = 'fa-solid fa-sun';
@@ -1380,7 +1410,7 @@
         function cancelEdit() {
             editingLinkId = null;
             document.getElementById('platform').value = ''; document.getElementById('url').value = ''; document.getElementById('desc').value = '';
-            document.getElementById('submit-btn').innerText = "+ Add New Link";
+            document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-plus" style="margin-right:6px;"></i> Add New Link';
             document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
@@ -1427,7 +1457,6 @@
                 document.getElementById('visitor-share-btn').classList.remove('hidden');
                 document.getElementById('side-menu-trigger').style.display = 'none';
                 if (data.theme) document.body.style.background = data.theme;
-                // Apply visitor's color mode preference
                 if (data.colorMode === 'light' && !document.body.classList.contains('light-mode')) {
                     document.body.classList.add('light-mode');
                 }
