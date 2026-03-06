@@ -30,30 +30,39 @@
         }
 
         :root {
-            --bg-gradient: linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%);
-            --glass-color: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --accent-glow: 0 0 25px rgba(255, 255, 255, 0.4);
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            --glass-color: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --accent-glow: 0 0 25px rgba(99, 102, 241, 0.5);
             --text-color: #ffffff;
-            --input-bg: rgba(255, 255, 255, 0.1);
-            --input-border: rgba(255, 255, 255, 0.5);
+            --input-bg: rgba(255, 255, 255, 0.07);
+            --input-border: rgba(255, 255, 255, 0.3);
             --input-focus-bg: #ffffff;
-            --input-focus-color: #1e3a8a;
-            --card-bg: rgba(255,255,255,0.15);
-            --card-border: rgba(255,255,255,0.2);
+            --input-focus-color: #1e1b4b;
+            --card-bg: rgba(255,255,255,0.08);
+            --card-border: rgba(255,255,255,0.12);
+        }
+
+        /* ===== 3D BACKGROUND CANVAS ===== */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
         /* ===== LIGHT MODE ===== */
         body.light-mode {
-            --glass-color: rgba(255,255,255,0.55);
-            --glass-border: rgba(0,0,0,0.12);
+            --glass-color: rgba(255,255,255,0.45);
+            --glass-border: rgba(0,0,0,0.10);
             --text-color: #1e293b;
-            --input-bg: rgba(255,255,255,0.7);
-            --input-border: rgba(0,0,0,0.2);
+            --input-bg: rgba(255,255,255,0.6);
+            --input-border: rgba(0,0,0,0.18);
             --input-focus-bg: #ffffff;
-            --input-focus-color: #1e3a8a;
-            --card-bg: rgba(255,255,255,0.45);
-            --card-border: rgba(0,0,0,0.1);
+            --input-focus-color: #1e1b4b;
+            --card-bg: rgba(255,255,255,0.38);
+            --card-border: rgba(0,0,0,0.08);
             color: #1e293b !important;
         }
 
@@ -114,7 +123,7 @@
 
         body.light-mode .btn-teardrop {
             border-color: rgba(0,0,0,0.2);
-            background: rgba(30,58,138,0.15);
+            background: rgba(30,27,75,0.12);
             color: #1e293b;
         }
 
@@ -129,7 +138,6 @@
         body.light-mode .secret-modal { color: #1e293b; }
         body.light-mode .secret-modal input { color: #1e293b; background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.2);}
         body.light-mode .admin-user-card { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.1); color: #1e293b; }
-
         body.light-mode .analytics-stat-card { background: rgba(255,255,255,0.5); border-color: rgba(0,0,0,0.1); color: #1e293b; }
         body.light-mode .analytics-link-row { background: rgba(255,255,255,0.4); border-color: rgba(0,0,0,0.1); color: #1e293b; }
         /* ===== END LIGHT MODE ===== */
@@ -149,6 +157,43 @@
             transition: background 0.5s ease, color 0.3s ease;
         }
 
+        /* ===== 3D ICON STYLE ===== */
+        .icon-3d {
+            display: inline-block;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        }
+
+        .icon-3d:hover {
+            filter: drop-shadow(0 8px 20px rgba(99,102,241,0.7)) brightness(1.2);
+        }
+
+        /* Feature icons 3D style */
+        .feature-icon i,
+        .section-title i,
+        .hero-logo i,
+        .menu-item i,
+        .stat-badge i,
+        .btn-teardrop i,
+        .hero-cta i,
+        .link-card i,
+        .dashboard-header i,
+        .analytics-stat-card i,
+        .top-profile-identity i {
+            display: inline-block;
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        /* Perspective wrapper for mouse-tracking 3D */
+        .perspective-zone {
+            perspective: 800px;
+        }
+
+        /* ===== STATUS ===== */
         #status-msg {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             padding: 12px 25px; border-radius: 12px; z-index: 10001;
@@ -209,37 +254,29 @@
             background: rgba(0,0,0,0.75); backdrop-filter: blur(12px);
             display: none; justify-content: center; align-items: center; z-index: 9998;
         }
-
         #qr-modal-overlay.active { display: flex; }
-
         .qr-modal-box {
-            background: #ffffff;
-            padding: 35px 30px 25px;
-            border-radius: 30px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            background: #ffffff; padding: 35px 30px 25px; border-radius: 30px;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-width: 300px; width: 90%;
         }
-
         .qr-modal-box p { color: #1e293b; font-weight: 700; margin: 15px 0 5px; font-size: 1rem; }
         .qr-modal-box small { color: #64748b; font-size: 0.75rem; display: block; margin-bottom: 18px; word-break: break-all; }
-
         .qr-close-btn {
             margin-top: 5px; padding: 12px 30px; border-radius: 12px;
-            border: none; background: linear-gradient(135deg, #1e3a8a, #6d28d9);
+            border: none; background: linear-gradient(135deg, #1e1b4b, #312e81);
             color: white; cursor: pointer; font-weight: 600; font-size: 0.9rem;
             transition: 0.3s; font-family: 'Poppins', sans-serif;
         }
-        .qr-close-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(109,40,217,0.4); }
-
+        .qr-close-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(49,46,129,0.5); }
         .qr-download-btn {
             margin-top: 10px; padding: 10px 25px; border-radius: 12px;
-            border: 2px solid #1e3a8a; background: transparent;
-            color: #1e3a8a; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            border: 2px solid #1e1b4b; background: transparent;
+            color: #1e1b4b; cursor: pointer; font-weight: 600; font-size: 0.85rem;
             transition: 0.3s; font-family: 'Poppins', sans-serif; display: block; width: 100%; margin-bottom: 8px;
         }
-        .qr-download-btn:hover { background: #1e3a8a; color: white; }
+        .qr-download-btn:hover { background: #1e1b4b; color: white; }
 
         /* ===== ANALYTICS BOX ===== */
         #analytics-box {
@@ -248,39 +285,32 @@
             text-align: center; border: 1.5px solid var(--glass-border);
             animation: slideUp 0.6s ease-out; z-index: 2; position: relative; margin-top: 20px;
         }
-
         .analytics-stat-card {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
             border-radius: 20px; padding: 18px 15px; text-align: center;
             transition: transform 0.3s;
         }
         .analytics-stat-card:hover { transform: translateY(-4px); }
         .analytics-stat-card .stat-num { font-size: 2rem; font-weight: 800; }
         .analytics-stat-card .stat-label { font-size: 0.75rem; opacity: 0.75; margin-top: 4px; }
-
         .analytics-stats-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px; margin: 20px 0;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0;
         }
-
         .analytics-link-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 13px 16px; background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 16px; margin-bottom: 10px;
+            padding: 13px 16px; background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; margin-bottom: 10px;
         }
-
         .analytics-link-name { font-weight: 600; font-size: 0.9rem; text-align: left; }
         .analytics-click-badge {
             background: rgba(56,189,248,0.25); border: 1px solid #38bdf8;
             border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; color: #38bdf8;
         }
-
         .chart-container {
             position: relative; height: 200px; margin: 20px 0 10px;
-            background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); border-radius: 20px; padding: 15px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         /* ===== BRAND LOGO ===== */
@@ -307,28 +337,28 @@
             position: fixed; top: 30px; left: 30px; font-size: 24px; cursor: pointer; z-index: 1000;
             transform: rotate(90deg); transition: 0.3s; background: var(--glass-color);
             padding: 10px 15px; border-radius: 12px; border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
         }
 
         .top-profile-identity {
             position: absolute; top: 30px; right: 30px; display: flex; align-items: center; gap: 12px; z-index: 1000;
             background: var(--glass-color); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
         }
 
         .side-menu {
             position: fixed; top: 0; left: -300px; width: 260px; height: 100%;
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px);
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(25px);
             border-right: 1px solid var(--glass-border); z-index: 999; padding: 100px 20px 20px;
             transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .side-menu.active { left: 0; }
-
         .menu-item {
             padding: 15px; margin: 10px 0; border-radius: 15px; cursor: pointer;
-            display: flex; align-items: center; gap: 12px; transition: 0.3s; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; background: rgba(255,255,255,0.04);
         }
-        .menu-item:hover { background: rgba(255,255,255,0.2); }
-
-        .submenu { max-height: 0; overflow: hidden; transition: 0.4s ease; background: rgba(0,0,0,0.1); border-radius: 15px; }
+        .menu-item:hover { background: rgba(255,255,255,0.12); }
+        .submenu { max-height: 0; overflow: hidden; transition: 0.4s ease; background: rgba(0,0,0,0.2); border-radius: 15px; }
         .submenu.open { max-height: 400px; margin-bottom: 10px; padding: 5px 0; }
         .color-option { font-size: 0.85rem; padding: 12px; margin: 5px 10px; }
 
@@ -341,45 +371,46 @@
         }
 
         .profile-pic {
-            width: 42px; height: 42px; border-radius: 50%; background: #7c3aed;
+            width: 42px; height: 42px; border-radius: 50%; background: #312e81;
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; border: 2px solid #fff; cursor: pointer;
-            overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { font-weight: 700; font-size: 2.2rem; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { font-weight: 700; font-size: 2.2rem; margin-bottom: 15px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .sub-text { font-size: 0.95rem; opacity: 0.9; margin-bottom: 35px; line-height: 1.6; }
 
         input {
             width: 100%; padding: 16px; margin: 12px 0; border-radius: 12px;
-            border: 1.5px solid rgba(255, 255, 255, 0.5); 
-            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.25); 
+            background: rgba(255, 255, 255, 0.07);
             color: #ffffff; outline: none; box-sizing: border-box; 
             text-align: left; padding-left: 20px; font-size: 1rem;
             transition: all 0.3s ease; font-family: 'Poppins', sans-serif;
         }
-        input:focus { border-color: #ffffff; background: #ffffff; color: #1e3a8a; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        input:focus { border-color: #a5b4fc; background: rgba(165,180,252,0.1); color: #ffffff; box-shadow: 0 0 20px rgba(99,102,241,0.3); }
 
         .btn-teardrop {
             width: 100%; padding: 18px; margin-top: 15px; border-radius: 50px 5px 50px 50px;
-            border: 1px solid rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(99, 102, 241, 0.2);
             color: white; font-weight: 600; cursor: pointer; transition: 0.4s;
             text-transform: uppercase; letter-spacing: 2px;
             position: relative; font-family: 'Poppins', sans-serif;
         }
-        .btn-teardrop:hover:not(:disabled) { transform: translateY(-5px); box-shadow: var(--accent-glow); }
+        .btn-teardrop:hover:not(:disabled) { transform: translateY(-5px); box-shadow: var(--accent-glow); background: rgba(99,102,241,0.35); }
         .btn-teardrop:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .link-card {
             padding: 15px 20px; margin: 15px 0; border-radius: 25px;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
             cursor: pointer; transition: 0.2s; text-decoration: none; color: white;
             width: 100%;
         }
+        .link-card:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3); transform: translateY(-2px); }
 
         .preview-mode .actions-box, 
         .preview-mode .fa-grip-vertical,
@@ -397,45 +428,39 @@
         .actions-box i { cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
 
         .public-url-box {
-            margin-top: 40px; padding: 20px; background: rgba(255, 255, 255, 0.1);
-            border-radius: 22px; border: 1px dashed rgba(255, 255, 255, 0.5); cursor: pointer;
+            margin-top: 40px; padding: 20px; background: rgba(99,102,241,0.08);
+            border-radius: 22px; border: 1px dashed rgba(99, 102, 241, 0.4); cursor: pointer;
             word-break: break-all;
         }
 
         .footer-signature {
             position: relative;
-            text-align: center;
-            width: 100%;
-            margin-top: 50px;
-            margin-bottom: 30px;
-            padding: 20px 0;
-            font-size: 0.8rem;
-            opacity: 0.6;
-            clear: both;
-            display: block;
-            z-index: 10;
+            text-align: center; width: 100%; margin-top: 50px; margin-bottom: 30px;
+            padding: 20px 0; font-size: 0.8rem; opacity: 0.5; clear: both; display: block; z-index: 10;
         }
 
         .hidden { display: none !important; }
 
         .dashboard-header {
-            display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; margin-top: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            margin-bottom: 10px; margin-top: 10px;
         }
         .dashboard-header img { width: 45px; height: auto; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); cursor: pointer; }
 
         #visitor-share-btn {
             position: fixed; top: 30px; left: 30px; z-index: 1000;
-            background: rgba(255,255,255,0.2); 
+            background: rgba(99,102,241,0.25); 
             width: 50px; height: 50px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             border: 1px solid var(--glass-border); cursor: pointer; backdrop-filter: blur(10px);
             font-size: 1.2rem; transition: 0.3s;
         }
+        #visitor-share-btn:hover { background: rgba(99,102,241,0.4); transform: scale(1.1); }
 
         .admin-user-card {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: rgba(255,255,255,0.08);
-            margin-bottom: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px; background: rgba(255,255,255,0.05);
+            margin-bottom: 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.08);
             text-align: left;
         }
         .verify-toggle {
@@ -458,23 +483,24 @@
         .hero-section::before {
             content: ''; position: absolute; top: -80px; left: -80px;
             width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
             border-radius: 50%; pointer-events: none;
         }
         .hero-section::after {
             content: ''; position: absolute; bottom: -60px; right: -60px;
             width: 200px; height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
             border-radius: 50%; pointer-events: none;
         }
 
         .hero-logo {
             width: 80px; height: 80px; margin: 0 auto 20px;
-            background: rgba(255,255,255,0.15); border-radius: 24px;
-            border: 1.5px solid rgba(255,255,255,0.3);
+            background: rgba(99,102,241,0.2); border-radius: 24px;
+            border: 1.5px solid rgba(99,102,241,0.4);
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            font-size: 2.2rem; box-shadow: 0 8px 32px rgba(99,102,241,0.3);
             animation: float 3s ease-in-out infinite;
+            transition: transform 0.1s ease;
         }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 
@@ -485,21 +511,23 @@
             display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;
         }
         .stat-badge {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);
             border-radius: 50px; padding: 8px 18px; font-size: 0.82rem; font-weight: 600;
             display: flex; align-items: center; gap: 6px;
+            transition: transform 0.2s, background 0.2s;
         }
+        .stat-badge:hover { background: rgba(99,102,241,0.28); transform: translateY(-2px); }
         .stat-badge i { opacity: 0.8; }
 
         .hero-cta {
             width: 100%; padding: 18px; border-radius: 50px 5px 50px 50px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.3);
             color: white; font-weight: 700; cursor: pointer; transition: 0.4s;
             text-transform: uppercase; letter-spacing: 2px; font-size: 1rem;
             font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .hero-cta:hover { transform: translateY(-5px); box-shadow: var(--accent-glow); background: rgba(255,255,255,0.35); }
+        .hero-cta:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(99,102,241,0.5); background: rgba(99,102,241,0.45); }
 
         .hero-login-link {
             display: block; margin-top: 18px; cursor: pointer;
@@ -522,15 +550,15 @@
         .steps-list { display: flex; flex-direction: column; gap: 16px; }
         .step-item {
             display: flex; align-items: flex-start; gap: 16px; padding: 16px;
-            background: rgba(255,255,255,0.07); border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s ease, background 0.3s ease;
+            background: rgba(255,255,255,0.04); border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08); transition: transform 0.3s ease, background 0.3s ease;
         }
-        .step-item:hover { transform: translateX(6px); background: rgba(255,255,255,0.13); }
+        .step-item:hover { transform: translateX(6px); background: rgba(99,102,241,0.12); }
 
         .step-number {
             width: 42px; height: 42px; min-width: 42px;
-            background: rgba(255,255,255,0.2); border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(99,102,241,0.25); border-radius: 14px;
+            border: 1px solid rgba(99,102,241,0.4);
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 1.1rem;
         }
@@ -540,11 +568,11 @@
 
         .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .feature-card {
-            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 22px; padding: 20px 16px; text-align: center;
             transition: transform 0.3s ease, background 0.3s ease;
         }
-        .feature-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.14); }
+        .feature-card:hover { transform: translateY(-5px); background: rgba(99,102,241,0.12); }
         .feature-icon { font-size: 1.6rem; margin-bottom: 10px; display: block; opacity: 0.9; }
         .feature-icon i { font-size: 1.6rem; }
         .feature-card strong { display: block; font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
@@ -554,7 +582,6 @@
             text-align: center; margin: 25px 0 5px; font-size: 0.8rem;
             opacity: 0.5; letter-spacing: 2px; text-transform: uppercase;
         }
-        /* ========== END LANDING PAGE STYLES ========== */
 
         /* Dashboard action buttons row */
         .dashboard-action-btns {
@@ -566,9 +593,73 @@
         }
 
         .analytics-title-icon { font-size: 1.6rem; margin-bottom: 5px; display: block; }
+
+        /* ===== 3D FLOATING ORBS ===== */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* ===== ICON HOVER 3D EFFECT ===== */
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+            50% { transform: translateY(-3px) rotateX(5deg) rotateY(5deg); }
+        }
+
+        .feature-card:hover .feature-icon i {
+            animation: iconFloat 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 6px 12px rgba(99,102,241,0.6));
+        }
+
+        .menu-item:hover i {
+            transform: scale(1.3) rotateY(20deg);
+            filter: drop-shadow(0 4px 8px rgba(99,102,241,0.5));
+        }
+
+        .stat-badge:hover i {
+            transform: scale(1.2) rotateZ(-10deg);
+            filter: drop-shadow(0 3px 6px rgba(99,102,241,0.6));
+        }
+
+        .hero-cta:hover i {
+            transform: scale(1.2) translateX(3px) rotateY(15deg);
+            filter: drop-shadow(0 4px 10px rgba(255,255,255,0.5));
+        }
+
+        .btn-teardrop:hover i {
+            transform: scale(1.15) rotateZ(-5deg);
+            filter: drop-shadow(0 3px 8px rgba(255,255,255,0.4));
+        }
+
+        .link-card:hover .link-info > i {
+            transform: scale(1.2) rotateY(20deg) translateZ(10px);
+            filter: drop-shadow(0 4px 12px currentColor);
+        }
+
+        #visitor-share-btn:hover i {
+            transform: scale(1.2) rotateZ(20deg);
+            filter: drop-shadow(0 4px 8px rgba(99,102,241,0.6));
+        }
+
+        .actions-box i:hover {
+            transform: scale(1.3) rotateY(25deg);
+            filter: drop-shadow(0 4px 8px rgba(255,255,255,0.3));
+        }
     </style>
 </head>
 <body>
+
+    <!-- ===== ANIMATED 3D BACKGROUND CANVAS ===== -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- ===== FLOATING ORBS ===== -->
+    <div class="bg-orb" id="orb1" style="width:350px;height:350px;background:radial-gradient(circle,rgba(49,46,129,0.5) 0%,transparent 70%);top:-100px;left:-100px;"></div>
+    <div class="bg-orb" id="orb2" style="width:300px;height:300px;background:radial-gradient(circle,rgba(30,27,75,0.6) 0%,transparent 70%);bottom:0;right:-80px;"></div>
+    <div class="bg-orb" id="orb3" style="width:200px;height:200px;background:radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%);top:40%;left:60%;"></div>
 
     <div id="status-msg"></div>
 
@@ -603,11 +694,10 @@
         <p class="sub-text">Search and manage user verification</p>
         <input type="text" id="admin-search" placeholder="Search users by name..." oninput="filterAdminUsers()">
         <div id="admin-users-list" style="margin-top: 20px; max-height: 400px; overflow-y: auto;"></div>
-        <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.1); margin-top: 20px;">Back to Dashboard</button>
+        <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.08); margin-top: 20px;">Back to Dashboard</button>
     </div>
 
     <div id="analytics-box" class="hidden" style="display:none;">
-        <!-- Analytics title with FA icon instead of emoji -->
         <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:5px;">
             <i class="fa-solid fa-chart-column" style="font-size:1.8rem; color:#a5b4fc;"></i>
             <h1 style="font-weight:800; font-size:1.8rem; margin:0;">Analytics</h1>
@@ -640,7 +730,7 @@
             <div id="analytics-links-breakdown"></div>
         </div>
 
-        <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.1); margin-top: 25px;">
+        <button class="btn-teardrop" onclick="toggleView('dashboard-box')" style="background: rgba(255,255,255,0.08); margin-top: 25px;">
             <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i> Back to Dashboard
         </button>
     </div>
@@ -671,13 +761,13 @@
             <i class="fa-solid fa-palette"></i> Change Theme <i class="fa-solid fa-chevron-down" style="margin-left: auto; font-size: 0.7rem;"></i>
         </div>
         <div id="theme-submenu" class="submenu">
-            <div class="menu-item color-option" onclick="changeTheme('linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)')">Deep Blue-Violet</div>
+            <div class="menu-item color-option" onclick="changeTheme('linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)')">Deep Indigo Night</div>
             <div class="menu-item color-option" onclick="changeTheme('linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)')">Fresh Ocean</div>
             <div class="menu-item color-option" onclick="changeTheme('linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)')">Sunset Glow</div>
             <div class="menu-item color-option" onclick="changeTheme('linear-gradient(135deg, #000000 0%, #434343 100%)')">Dark Material</div>
             <div class="menu-item color-option" onclick="changeTheme('linear-gradient(135deg, #1e293b 0%, #334155 100%)')">Midnight Blue</div>
         </div>
-        <hr style="opacity: 0.2; margin: 20px 0;">
+        <hr style="opacity: 0.15; margin: 20px 0;">
         <div class="menu-item" onclick="userSignOut()">
             <i class="fa-solid fa-right-from-bracket"></i> Sign Out
         </div>
@@ -688,8 +778,7 @@
 
     <div id="landing-page">
         <div class="hero-section">
-            <!-- Hero logo: FA icon instead of emoji -->
-            <div class="hero-logo">
+            <div class="hero-logo" id="hero-logo-3d">
                 <i class="fa-solid fa-link" style="color: rgba(255,255,255,0.9);"></i>
             </div>
             <h1 class="hero-title gold-shiny">TapLinks</h1>
@@ -701,7 +790,6 @@
                 <div class="stat-badge"><i class="fa-solid fa-shield-halved"></i> Secure &amp; Private</div>
                 <div class="stat-badge"><i class="fa-solid fa-chart-line"></i> Track Clicks</div>
             </div>
-            <!-- CTA: FA rocket icon instead of emoji -->
             <button class="hero-cta" onclick="showAuthSection('signup-box')">
                 <i class="fa-solid fa-rocket"></i> Get Started — It's Free
             </button>
@@ -709,7 +797,6 @@
         </div>
 
         <div class="section-card">
-            <!-- Section title: FA icon instead of emoji -->
             <p class="section-title">
                 <i class="fa-solid fa-circle-nodes"></i> How It Works
             </p>
@@ -746,13 +833,11 @@
         </div>
 
         <div class="section-card">
-            <!-- Section title: FA icon instead of emoji -->
             <p class="section-title">
                 <i class="fa-solid fa-star"></i> Features
             </p>
             <div class="features-grid">
                 <div class="feature-card">
-                    <!-- Feature icons: FA instead of emoji -->
                     <span class="feature-icon"><i class="fa-solid fa-swatchbook" style="color:#c084fc;"></i></span>
                     <strong>Custom Themes</strong>
                     <p>Choose from beautiful gradient themes to match your personal brand.</p>
@@ -841,15 +926,15 @@
         <button class="btn-teardrop" id="submit-btn" onclick="addLink()">
             <i class="fa-solid fa-plus" style="margin-right:6px;"></i> Add New Link
         </button>
-        <button class="btn-teardrop hidden" id="cancel-edit-btn" onclick="cancelEdit()" style="background: rgba(239, 68, 68, 0.3); margin-top: 5px; font-size: 0.8rem;">
+        <button class="btn-teardrop hidden" id="cancel-edit-btn" onclick="cancelEdit()" style="background: rgba(239, 68, 68, 0.25); margin-top: 5px; font-size: 0.8rem;">
             <i class="fa-solid fa-xmark" style="margin-right:6px;"></i> Cancel Edit
         </button>
 
         <div class="dashboard-action-btns">
-            <button class="btn-teardrop" onclick="showQRCode()" style="background: rgba(56,189,248,0.2); border-color: rgba(56,189,248,0.5);">
+            <button class="btn-teardrop" onclick="showQRCode()" style="background: rgba(56,189,248,0.15); border-color: rgba(56,189,248,0.4);">
                 <i class="fa-solid fa-qrcode"></i> QR Code
             </button>
-            <button class="btn-teardrop" onclick="showAnalytics()" style="background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5);">
+            <button class="btn-teardrop" onclick="showAnalytics()" style="background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4);">
                 <i class="fa-solid fa-chart-column"></i> Analytics
             </button>
         </div>
@@ -866,6 +951,7 @@
     <div class="footer-signature">Designed &amp; Developed by Achraf</div>
 
     <script>
+        // ===== FIREBASE =====
         const firebaseConfig = {
           apiKey: "AIzaSyDKTpYmGt7qc0KDFYi3Ct6yqax01H1BZos",
           authDomain: "taplinks-5c4fe.firebaseapp.com",
@@ -887,6 +973,282 @@
         let lastClickTime = 0;
         let allUsersForAdmin = [];
         let analyticsChartInstance = null;
+
+        // ===== 3D BACKGROUND CANVAS =====
+        (function initBgCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let W, H, particles = [], mouse = { x: 0, y: 0 };
+
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Particle system
+            const PARTICLE_COUNT = 60;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    z: Math.random() * 400 + 100,
+                    baseX: Math.random() * window.innerWidth,
+                    baseY: Math.random() * window.innerHeight,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    r: Math.random() * 2 + 0.5,
+                    opacity: Math.random() * 0.5 + 0.15,
+                    color: Math.random() > 0.5 ? '99,102,241' : '165,180,252',
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: Math.random() * 0.02 + 0.01
+                });
+            }
+
+            // Grid lines for 3D depth effect
+            function drawGrid() {
+                const mx = mouse.x / W - 0.5;
+                const my = mouse.y / H - 0.5;
+                const perspective = 600;
+                const rotX = my * 15;
+                const rotY = mx * 15;
+
+                ctx.save();
+                ctx.translate(W / 2, H / 2);
+
+                // Draw subtle grid
+                const gridSize = 80;
+                const cols = Math.ceil(W / gridSize) + 4;
+                const rows = Math.ceil(H / gridSize) + 4;
+
+                for (let i = -cols; i <= cols; i++) {
+                    const x1 = i * gridSize + rotY * 3;
+                    const grd1 = ctx.createLinearGradient(x1, -H, x1, H);
+                    grd1.addColorStop(0, 'rgba(49,46,129,0)');
+                    grd1.addColorStop(0.5, 'rgba(99,102,241,0.07)');
+                    grd1.addColorStop(1, 'rgba(49,46,129,0)');
+                    ctx.beginPath();
+                    ctx.moveTo(x1, -H / 2);
+                    ctx.lineTo(x1, H / 2);
+                    ctx.strokeStyle = grd1;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+
+                for (let j = -rows; j <= rows; j++) {
+                    const y1 = j * gridSize + rotX * 3;
+                    const grd2 = ctx.createLinearGradient(-W, y1, W, y1);
+                    grd2.addColorStop(0, 'rgba(49,46,129,0)');
+                    grd2.addColorStop(0.5, 'rgba(99,102,241,0.07)');
+                    grd2.addColorStop(1, 'rgba(49,46,129,0)');
+                    ctx.beginPath();
+                    ctx.moveTo(-W / 2, y1);
+                    ctx.lineTo(W / 2, y1);
+                    ctx.strokeStyle = grd2;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            function drawParticles() {
+                const mx = mouse.x / W - 0.5;
+                const my = mouse.y / H - 0.5;
+
+                particles.forEach((p, i) => {
+                    // Move particles
+                    p.x += p.vx + mx * 0.5;
+                    p.y += p.vy + my * 0.5;
+                    p.pulse += p.pulseSpeed;
+
+                    // Wrap around
+                    if (p.x < 0) p.x = W;
+                    if (p.x > W) p.x = 0;
+                    if (p.y < 0) p.y = H;
+                    if (p.y > H) p.y = 0;
+
+                    const scale = 400 / (400 + p.z);
+                    const pulsed = p.opacity * (0.7 + 0.3 * Math.sin(p.pulse));
+
+                    // Draw glow particle
+                    const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * scale * 6);
+                    grd.addColorStop(0, `rgba(${p.color},${pulsed})`);
+                    grd.addColorStop(1, `rgba(${p.color},0)`);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r * scale * 6, 0, Math.PI * 2);
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+
+                    // Core dot
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r * scale, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${p.color},${Math.min(1, pulsed * 1.5)})`;
+                    ctx.fill();
+
+                    // Connect nearby particles
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 100) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(99,102,241,${0.08 * (1 - dist / 100)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                });
+            }
+
+            function drawCenterGlow() {
+                const mx = mouse.x;
+                const my = mouse.y;
+                const grd = ctx.createRadialGradient(mx, my, 0, mx, my, 300);
+                grd.addColorStop(0, 'rgba(99,102,241,0.04)');
+                grd.addColorStop(1, 'rgba(99,102,241,0)');
+                ctx.beginPath();
+                ctx.arc(mx, my, 300, 0, Math.PI * 2);
+                ctx.fillStyle = grd;
+                ctx.fill();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, W, H);
+                drawGrid();
+                drawCenterGlow();
+                drawParticles();
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            document.addEventListener('mousemove', e => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+        })();
+
+        // ===== 3D MOUSE PARALLAX FOR ORBS =====
+        (function initOrbParallax() {
+            const orb1 = document.getElementById('orb1');
+            const orb2 = document.getElementById('orb2');
+            const orb3 = document.getElementById('orb3');
+
+            let targetX = 0, targetY = 0;
+            let currentX = 0, currentY = 0;
+
+            document.addEventListener('mousemove', e => {
+                targetX = (e.clientX / window.innerWidth - 0.5) * 40;
+                targetY = (e.clientY / window.innerHeight - 0.5) * 40;
+            });
+
+            function animateOrbs() {
+                currentX += (targetX - currentX) * 0.05;
+                currentY += (targetY - currentY) * 0.05;
+
+                orb1.style.transform = `translate(${currentX * 0.6}px, ${currentY * 0.6}px)`;
+                orb2.style.transform = `translate(${-currentX * 0.4}px, ${-currentY * 0.4}px)`;
+                orb3.style.transform = `translate(${currentX * 1.2}px, ${currentY * 0.8}px)`;
+
+                requestAnimationFrame(animateOrbs);
+            }
+            animateOrbs();
+        })();
+
+        // ===== 3D ICON MOUSE TRACKING =====
+        (function initIconTracking() {
+            document.addEventListener('mousemove', e => {
+                const icons = document.querySelectorAll(
+                    '.feature-icon i, .section-title i, .hero-logo i, .stat-badge i, .hero-cta i, .link-card .link-info > i'
+                );
+                icons.forEach(icon => {
+                    const rect = icon.getBoundingClientRect();
+                    if (rect.width === 0) return;
+                    const cx = rect.left + rect.width / 2;
+                    const cy = rect.top + rect.height / 2;
+                    const dx = (e.clientX - cx) / window.innerWidth;
+                    const dy = (e.clientY - cy) / window.innerHeight;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const maxDist = 0.3;
+                    if (dist < maxDist) {
+                        const strength = (1 - dist / maxDist) * 25;
+                        const rotY = dx * strength;
+                        const rotX = -dy * strength;
+                        icon.style.transform = `perspective(300px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${1 + strength * 0.015})`;
+                        icon.style.filter = `drop-shadow(${rotY * 0.3}px ${-rotX * 0.3}px ${10 + strength * 0.5}px rgba(99,102,241,${0.3 + strength * 0.02}))`;
+                    } else {
+                        icon.style.transform = '';
+                        icon.style.filter = '';
+                    }
+                });
+            });
+
+            // Reset on leave
+            document.addEventListener('mouseleave', () => {
+                document.querySelectorAll('.feature-icon i, .section-title i, .hero-logo i').forEach(icon => {
+                    icon.style.transform = '';
+                    icon.style.filter = '';
+                });
+            });
+        })();
+
+        // ===== 3D HERO LOGO TILT =====
+        (function initHeroLogoTilt() {
+            const logo = document.getElementById('hero-logo-3d');
+            if (!logo) return;
+            logo.addEventListener('mousemove', e => {
+                const rect = logo.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dx = (e.clientX - cx) / (rect.width / 2);
+                const dy = (e.clientY - cy) / (rect.height / 2);
+                logo.style.transform = `perspective(200px) rotateX(${-dy * 20}deg) rotateY(${dx * 20}deg) translateY(0px) scale(1.05)`;
+                logo.style.boxShadow = `${dx * -10}px ${dy * -10}px 30px rgba(99,102,241,0.5)`;
+            });
+            logo.addEventListener('mouseleave', () => {
+                logo.style.transform = '';
+                logo.style.boxShadow = '';
+            });
+        })();
+
+        // ===== 3D CARD TILT ON HOVER =====
+        (function initCardTilt() {
+            document.addEventListener('mousemove', e => {
+                document.querySelectorAll('.link-card').forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    if (e.clientY < rect.top - 50 || e.clientY > rect.bottom + 50 ||
+                        e.clientX < rect.left - 50 || e.clientX > rect.right + 50) return;
+                    const cx = rect.left + rect.width / 2;
+                    const cy = rect.top + rect.height / 2;
+                    const dx = (e.clientX - cx) / (rect.width / 2);
+                    const dy = (e.clientY - cy) / (rect.height / 2);
+                    card.style.transform = `perspective(600px) rotateX(${-dy * 4}deg) rotateY(${dx * 6}deg) translateY(-2px)`;
+                    card.style.boxShadow = `${dx * -8}px ${dy * -8}px 20px rgba(99,102,241,0.2)`;
+                });
+            });
+
+            document.addEventListener('mouseleave', () => {
+                document.querySelectorAll('.link-card').forEach(card => {
+                    card.style.transform = '';
+                    card.style.boxShadow = '';
+                });
+            });
+
+            // Reset when not hovering card
+            document.addEventListener('mousemove', e => {
+                document.querySelectorAll('.link-card').forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    if (e.clientY < rect.top - 10 || e.clientY > rect.bottom + 10 ||
+                        e.clientX < rect.left - 10 || e.clientX > rect.right + 10) {
+                        card.style.transform = '';
+                        card.style.boxShadow = '';
+                    }
+                });
+            });
+        })();
 
         // ===== LOADING BUTTON =====
         function setBtnLoading(btnId, isLoading, defaultText) {
@@ -914,14 +1276,12 @@
         })();
 
         window.onload = () => {
-            // Restore dark/light mode
             const savedMode = localStorage.getItem('colorMode');
             if (savedMode === 'light') {
                 document.body.classList.add('light-mode');
                 document.getElementById('theme-mode-icon').className = 'fa-solid fa-sun';
                 document.getElementById('theme-mode-label').innerText = 'Dark Mode';
             }
-
             const params = new URLSearchParams(window.location.search);
             const userParam = params.get('u');
             if (userParam) { 
@@ -958,7 +1318,7 @@
             new QRCode(container, {
                 text: profileUrl,
                 width: 200, height: 200,
-                colorDark: "#1e3a8a",
+                colorDark: "#1e1b4b",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
@@ -993,7 +1353,6 @@
             const topLink = links.reduce((best, l) => (!best || (l.clicks || 0) > (best.clicks || 0)) ? l : best, null);
             document.getElementById('stat-top-link').innerText = topLink ? topLink.name.slice(0, 6) : '—';
 
-            // Chart
             const ctx = document.getElementById('analytics-chart').getContext('2d');
             if (analyticsChartInstance) analyticsChartInstance.destroy();
             const labels = links.map(l => l.name);
@@ -1016,14 +1375,12 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: { color: textColor, stepSize: 1 },
-                            grid: { color: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)' }
+                            grid: { color: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)' }
                         },
                         x: {
                             ticks: { color: textColor },
@@ -1033,7 +1390,6 @@
                 }
             });
 
-            // Per-link breakdown
             const breakdown = document.getElementById('analytics-links-breakdown');
             breakdown.innerHTML = '';
             if (links.length === 0) {
@@ -1055,7 +1411,6 @@
                 });
             }
 
-            // Show analytics view
             document.getElementById('landing-page').style.display = 'none';
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             const analyticsBox = document.getElementById('analytics-box');
@@ -1248,7 +1603,7 @@
             if (n.includes('youtube'))   return { icon: 'fa-brands fa-youtube', color: '#FF0000' };
             if (n.includes('whatsapp'))  return { icon: 'fa-brands fa-whatsapp', color: '#25D366' };
             if (n.includes('linkedin'))  return { icon: 'fa-brands fa-linkedin', color: '#0077B5' };
-            return { icon: 'fa-solid fa-link', color: '#ffffff' };
+            return { icon: 'fa-solid fa-link', color: '#a5b4fc' };
         }
 
         // ===== AUTH =====
@@ -1265,7 +1620,7 @@
                     return showStatus("Username taken", 'error');
                 }
                 const res = await auth.createUserWithEmailAndPassword(email, pass);
-                const userData = { uid: res.user.uid, username: user, links: [], profilePic: null, isVerified: false, theme: 'linear-gradient(135deg, #1e3a8a 0%, #4c1d95 30%, #6d28d9 100%)', colorMode: 'dark' };
+                const userData = { uid: res.user.uid, username: user, links: [], profilePic: null, isVerified: false, theme: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)', colorMode: 'dark' };
                 await db.collection("users").doc(res.user.uid).set(userData);
                 enterDashboard(res.user.uid, userData);
             } catch (e) { 
@@ -1363,7 +1718,7 @@
                 if (isPreviewMode) { card.onclick = (e) => { e.preventDefault(); trackClick(l.id, l.url); }; }
                 card.innerHTML = `<div class="link-info">
                         ${!isPreviewMode ? '<i class="fa-solid fa-grip-vertical" style="opacity:0.3; font-size:0.8rem; cursor:grab;"></i>' : ''}
-                        <i class="${meta.icon}" style="color:${meta.color}"></i>
+                        <i class="${meta.icon}" style="color:${meta.color}; filter: drop-shadow(0 3px 8px ${meta.color}60); transition: transform 0.2s, filter 0.2s;"></i>
                         <div class="link-text-content">
                             <span style="font-weight:600;">${l.name}</span>
                             ${l.desc ? `<span class="link-desc">${l.desc}</span>` : ''}
@@ -1372,8 +1727,8 @@
                     <div class="actions-box">
                         ${!isPreviewMode ? `
                         <span class="click-count" style="font-size:0.8rem; opacity:0.8;"><i class="fa-solid fa-chart-simple"></i> ${l.clicks || 0}</span>
-                        <i class="fa-solid fa-pen-to-square" style="color:#fbbf24" onclick="event.preventDefault(); editLink(${l.id})"></i>
-                        <i class="fa-solid fa-trash" style="color:#ef4444" onclick="event.preventDefault(); deleteLink(${l.id})"></i>
+                        <i class="fa-solid fa-pen-to-square" style="color:#fbbf24; transition: transform 0.2s, filter 0.2s;" onclick="event.preventDefault(); editLink(${l.id})"></i>
+                        <i class="fa-solid fa-trash" style="color:#ef4444; transition: transform 0.2s, filter 0.2s;" onclick="event.preventDefault(); deleteLink(${l.id})"></i>
                         ` : ''}
                     </div>`;
                 list.appendChild(card);
